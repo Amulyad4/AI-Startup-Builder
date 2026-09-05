@@ -11,6 +11,7 @@ import { useTheme } from "../context/ThemeContext";
 import ThemeToggle from "../components/ThemeToggle";
 import Logo from "../components/Logo";
 import { generateDynamicAgentReports } from "../services/agentEngine";
+import { startStartupGeneration, pollStartupStatus, formatBackendBlueprintToReports } from "../services/api";
 import { botEmotionManager } from "../components/AIBot/BotEmotionManager";
 
 // Helper: Formatted Markdown Text Parser (Strips raw ** asterisks and renders styled JSX)
@@ -90,50 +91,72 @@ const getIndustryMetrics = (industry) => {
 };
 
 // Dynamic Flashcard Stats extracted per agent output
-const getFlashcardStats = (intakeData) => {
+const getFlashcardStats = (intakeData, reports) => {
   const m = getIndustryMetrics(intakeData?.industry);
+  const raw = reports?._raw || {};
+  const v = raw.validation || {};
+  const mk = raw.market || {};
+  const f = raw.financial || {};
+  const pt = raw.pitch || {};
+
+  const feasScore = v.feasibility_score !== undefined ? `${v.feasibility_score} / 100` : "9.4 / 10";
+  const innovScore = v.innovation_score !== undefined ? `${v.innovation_score} / 100` : "High Market Fit";
+  const tamVal = mk.market_size || m.tam;
+  const breakEvenVal = f.break_even || "3.5 Months";
+  const estCost = f.estimated_cost || "$45,000";
+  const estRev = f.expected_revenue || "$380k ARR";
+  const roiVal = f.roi || "12.0x";
+
   return {
     ideaValidation: [
-      { label: "Feasibility Score", value: "9.4 / 10", color: "#10B981", icon: Award },
-      { label: "Market Fit", value: "High Commercial Fit", color: "#6366F1", icon: Sparkles },
+      { label: "Feasibility Score", value: feasScore, color: "#10B981", icon: Award },
+      { label: "Innovation Index", value: innovScore, color: "#6366F1", icon: Sparkles },
     ],
     marketResearch: [
-      { label: "TAM (Global)", value: m.tam, color: "#06B6D4", icon: DollarSign },
-      { label: "SAM (Target)", value: m.sam, color: "#0EA5E9", icon: BarChart3 },
+      { label: "Market Sizing", value: String(tamVal).length > 24 ? String(tamVal).slice(0, 22) + "..." : tamVal, color: "#06B6D4", icon: DollarSign },
+      { label: "Target Sector", value: mk.industry || intakeData?.industry || "SaaS / B2B", color: "#0EA5E9", icon: BarChart3 },
       { label: "Market CAGR", value: `${m.cagr} / Year`, color: "#10B981", icon: TrendingUp },
     ],
     financialPlanning: [
-      { label: "LTV : CAC Ratio", value: "12.0x", color: "#10B981", icon: TrendingUp },
-      { label: "CAC Estimate", value: "$240 / Customer", color: "#6366F1", icon: DollarSign },
-      { label: "LTV Estimate", value: "$2,880", color: "#0EA5E9", icon: DollarSign },
-      { label: "CAC Payback", value: "3.5 Months", color: "#F59E0B", icon: Clock },
+      { label: "Projected ROI", value: String(roiVal).length > 20 ? String(roiVal).slice(0, 18) + "..." : roiVal, color: "#10B981", icon: TrendingUp },
+      { label: "Setup Capital", value: String(estCost).length > 22 ? String(estCost).slice(0, 20) + "..." : estCost, color: "#6366F1", icon: DollarSign },
+      { label: "Expected Revenue", value: String(estRev).length > 22 ? String(estRev).slice(0, 20) + "..." : estRev, color: "#0EA5E9", icon: DollarSign },
+      { label: "Break-Even", value: String(breakEvenVal).length > 20 ? String(breakEvenVal).slice(0, 18) + "..." : breakEvenVal, color: "#F59E0B", icon: Clock },
     ],
     competitorAnalysis: [
-      { label: "Moat Strength", value: "Strong (AI Moat)", color: "#10B981", icon: ShieldCheck },
-      { label: "Incumbent Gap", value: "Manual Overhead", color: "#6366F1", icon: Activity },
+      { label: "Moat Analysis", value: "Verified AI Moat", color: "#10B981", icon: ShieldCheck },
+      { label: "Competitor Gap", value: "Market Open", color: "#6366F1", icon: Activity },
     ],
     pitchDeck: [
-      { label: "Slide Deck", value: "10 Slides Ready", color: "#F59E0B", icon: Presentation },
-      { label: "Investor Pitch", value: "5-Min Script Included", color: "#10B981", icon: Sparkles },
+      { label: "Deck Title", value: pt.title ? (pt.title.length > 20 ? pt.title.slice(0, 18) + "..." : pt.title) : "10 Slides Ready", color: "#F59E0B", icon: Presentation },
+      { label: "Pitch Readiness", value: "Investor Ready", color: "#10B981", icon: Sparkles },
     ]
   };
 };
 
 // Dynamic Pitch Deck Slide Preview Component
-const PitchDeckSlidePreview = ({ intakeData }) => {
+const PitchDeckSlidePreview = ({ intakeData, reports }) => {
   const m = getIndustryMetrics(intakeData?.industry);
-  const idea = intakeData?.idea || "AI Autonomous Platform";
-  const problem = intakeData?.problem || "Inefficient manual workflows and high friction costs in industry operations.";
-  const audience = intakeData?.audience || "Target Industry Professionals";
-  const industry = intakeData?.industry || "SaaS / B2B";
+  const raw = reports?._raw || {};
+  const pt = raw.pitch || {};
+  const v = raw.validation || {};
+  const b = raw.business_model || {};
+  const f = raw.financial || {};
+
+  const idea = pt.title || intakeData?.idea || "AI Startup Architecture";
+  const problem = pt.problem || v.problem || intakeData?.problem || "High friction manual operations in industry.";
+  const solution = pt.solution || v.solution || "Autonomous intelligent multi-agent platform.";
+  const market = pt.market || raw.market?.market_size || `${m.tam} Total Addressable Market`;
+  const bizModel = pt.business_model || b.revenue_model || "Tiered SaaS subscription model";
+  const financials = pt.financials || f.expected_revenue || `${m.y1} ARR Year 1`;
 
   const slides = [
-    { slide: "Slide 1: Title & Vision", content: `${idea} · Next-Gen ${industry} Architecture` },
-    { slide: "Slide 2: The Problem", content: `${problem}` },
-    { slide: "Slide 3: The Solution", content: `Autonomous intelligence workflow built specifically for ${audience}.` },
-    { slide: "Slide 4: Market Sizing", content: `${m.tam} Total Addressable Market with ${m.cagr} annual CAGR expansion.` },
-    { slide: "Slide 5: Business Model", content: `Tiered SaaS subscriptions ($49 - $499/mo) with ${m.margin} gross margin target.` },
-    { slide: "Slide 6: Financial Projections", content: `${m.y1} ARR Year 1 → ${m.y3} ARR Year 3 with strong unit economics.` },
+    { slide: "Slide 1: Title & Vision", content: idea },
+    { slide: "Slide 2: The Problem", content: problem },
+    { slide: "Slide 3: The Solution", content: solution },
+    { slide: "Slide 4: Market Sizing", content: market },
+    { slide: "Slide 5: Business Model", content: bizModel },
+    { slide: "Slide 6: Financial Projections", content: financials },
   ];
 
   return (
@@ -294,7 +317,7 @@ const SwarmTerminalConsole = ({ reports, selectedAgentsList }) => (
             <span className="text-[10px] text-slate-400">Latency: 240ms · Confidence: 96%</span>
           </div>
           <div className="text-[11px] text-slate-300 leading-relaxed font-mono line-clamp-2">
-            {renderFormattedText(reports[a.key] || "Agent output packet synthesized.")}
+            {renderFormattedText(reports?.[a.key] || "Agent output packet synthesized.")}
           </div>
         </div>
       ))}
@@ -376,13 +399,75 @@ export default function DashboardPage({ go, user, setUser }) {
   }, [intakeData, go]);
 
   const safeIntake = intakeData || { idea: "", problem: "", audience: "", industry: "SaaS / B2B" };
-  const [reports] = useState(() => generateDynamicAgentReports(safeIntake));
+  const [reports, setReports] = useState(() => {
+    const cached = localStorage.getItem(`blueprint_${safeIntake.idea}`);
+    if (cached) {
+      try { return JSON.parse(cached); } catch (e) {}
+    }
+    return null;
+  });
+  const [isLoading, setIsLoading] = useState(!reports);
+  const [loadingStep, setLoadingStep] = useState("Initializing multi-agent orchestrator...");
+  const [backendError, setBackendError] = useState(null);
+  const [isLiveFromBackend, setIsLiveFromBackend] = useState(Boolean(localStorage.getItem(`blueprint_${safeIntake.idea}`)));
+
   const [copiedKey, setCopiedKey] = useState(null);
   const [expandedKeys, setExpandedKeys] = useState(() => {
     const init = {};
     selectedAgentKeys.slice(0, 3).forEach(k => { init[k] = true; });
     return init;
   });
+
+  // Call FastAPI backend to generate blueprint via LangGraph
+  const fetchBlueprintFromBackend = React.useCallback(async (forceRefresh = false) => {
+    if (!safeIntake?.idea) return;
+
+    if (!forceRefresh) {
+      const cached = localStorage.getItem(`blueprint_${safeIntake.idea}`);
+      if (cached) {
+        try {
+          setReports(JSON.parse(cached));
+          setIsLoading(false);
+          setIsLiveFromBackend(true);
+          return;
+        } catch (e) {}
+      }
+    }
+
+    setIsLoading(true);
+    setBackendError(null);
+    botEmotionManager.setEmotion("thinking", 25000);
+
+    try {
+      setLoadingStep("Connecting to FastAPI backend & initializing LangGraph...");
+      const taskResponse = await startStartupGeneration(safeIntake.idea);
+      setLoadingStep("Multi-agent swarm active! 10 agents executing sequentially...");
+
+      const blueprintResult = await pollStartupStatus(taskResponse.task_id, (statusUpdate) => {
+        if (statusUpdate.status === "processing") {
+          setLoadingStep("Agents synthesizing market analysis, financial models, and pitch deck...");
+        }
+      });
+
+      const formattedReports = formatBackendBlueprintToReports(blueprintResult);
+      setReports(formattedReports);
+      setIsLiveFromBackend(true);
+      localStorage.setItem(`blueprint_${safeIntake.idea}`, JSON.stringify(formattedReports));
+      botEmotionManager.setEmotion("celebrating", 6000);
+    } catch (err) {
+      console.warn("Backend API not reachable or failed, falling back to local generator:", err);
+      setBackendError(err.message || "Backend service offline");
+      const fallbackReports = generateDynamicAgentReports(safeIntake);
+      setReports(fallbackReports);
+      setIsLiveFromBackend(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [safeIntake]);
+
+  React.useEffect(() => {
+    fetchBlueprintFromBackend(false);
+  }, [fetchBlueprintFromBackend]);
 
   // Automatically save current execution into startup_history
   React.useEffect(() => {
@@ -433,7 +518,7 @@ export default function DashboardPage({ go, user, setUser }) {
       text += `--------------------------------------------------\n`;
       text += `${i + 1}. ${a.tag} · ${a.name.toUpperCase()}\n`;
       text += `--------------------------------------------------\n`;
-      text += `${reports[a.key] || "Report pending..."}\n\n`;
+      text += `${reports?.[a.key] || "Report pending..."}\n\n`;
     });
 
     const element = document.createElement("a");
@@ -465,10 +550,12 @@ export default function DashboardPage({ go, user, setUser }) {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => go("select")}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-surface border border-border text-text hover:bg-surfaceAlt transition-all cursor-pointer shadow-xs hover:border-cyan-500/40"
+            onClick={() => fetchBlueprintFromBackend(true)}
+            disabled={isLoading}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-surface border border-border text-text hover:bg-surfaceAlt transition-all cursor-pointer shadow-xs hover:border-cyan-500/40 disabled:opacity-50"
           >
-            <RefreshCw size={13} className="text-cyan-400" /> Re-run Agents
+            <RefreshCw size={13} className={`text-cyan-400 ${isLoading ? "animate-spin" : ""}`} /> 
+            {isLoading ? "Running..." : "Re-run Agents"}
           </button>
 
           <button
@@ -573,14 +660,27 @@ export default function DashboardPage({ go, user, setUser }) {
           {/* Active Concept Banner */}
           <div className="bento-card p-6 rounded-3xl border border-border bg-surface flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
             <div className="space-y-1">
-              <span className="font-mono text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
-                ACTIVE CONCEPT ANALYSIS
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
+                  ACTIVE CONCEPT ANALYSIS
+                </span>
+                {isLiveFromBackend && (
+                  <span className="font-mono text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    LANGGRAPH SWARM (LIVE)
+                  </span>
+                )}
+                {backendError && (
+                  <span className="font-mono text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                    DEMO MODE
+                  </span>
+                )}
+              </div>
               <h1 className="font-display text-xl sm:text-2xl font-bold text-text">
-                "{intakeData.idea}"
+                "{safeIntake.idea}"
               </h1>
               <p className="text-xs text-textMuted font-mono">
-                Sector: <strong className="text-text font-bold">{intakeData.industry || "SaaS / B2B"}</strong> · Executed {selectedAgentsList.length} Specialist Agents
+                Sector: <strong className="text-text font-bold">{safeIntake.industry || "SaaS / B2B"}</strong> · Executed {selectedAgentsList.length} Specialist Agents
               </p>
             </div>
 
@@ -593,6 +693,29 @@ export default function DashboardPage({ go, user, setUser }) {
               </button>
             </div>
           </div>
+
+          {/* Real-time Multi-Agent Swarm Processing Banner */}
+          {isLoading && (
+            <div className="p-6 rounded-3xl border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-surface to-indigo-950/40 shadow-xl space-y-3 animate-fadeUp text-left">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                    <Cpu size={16} className="animate-spin" />
+                  </div>
+                  <div>
+                    <h4 className="font-display font-bold text-sm text-text">Multi-Agent Swarm in Progress</h4>
+                    <p className="text-xs text-cyan-400 font-mono">{loadingStep}</p>
+                  </div>
+                </div>
+                <span className="font-mono text-[10px] text-textMuted bg-surface px-2.5 py-1 rounded-full border border-border">
+                  10 Agents Chained via LangGraph
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-surfaceAlt rounded-full overflow-hidden border border-border">
+                <div className="h-full bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 w-full animate-pulse rounded-full" />
+              </div>
+            </div>
+          )}
 
           {/* VIEW SWITCHER TABS */}
           <div className="flex bg-surface p-1.5 rounded-2xl border border-border shadow-xs max-w-xl font-mono text-xs font-bold">
@@ -635,8 +758,8 @@ export default function DashboardPage({ go, user, setUser }) {
                 const Icon = agent.icon;
                 const agentColor = getAgentColor(agent.key, dark);
                 const isExpanded = expandedKeys[agent.key];
-                const reportText = reports[agent.key] || "";
-                const dynamicFlashcards = getFlashcardStats(safeIntake);
+                const reportText = reports?.[agent.key] || (isLoading ? "Agent currently executing in LangGraph multi-agent chain..." : "Report pending...");
+                const dynamicFlashcards = getFlashcardStats(safeIntake, reports);
                 const stats = dynamicFlashcards[agent.key] || null;
 
                 return (
@@ -708,7 +831,7 @@ export default function DashboardPage({ go, user, setUser }) {
                     )}
 
                     {agent.key === "pitchDeck" && (
-                      <PitchDeckSlidePreview intakeData={safeIntake} />
+                      <PitchDeckSlidePreview intakeData={safeIntake} reports={reports} />
                     )}
 
                     {/* Rich Formatted Markdown Output (NO RAW ** ASTERISKS) */}
