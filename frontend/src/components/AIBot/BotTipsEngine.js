@@ -51,22 +51,13 @@ export function getContextAwareTip(routeKey, intakeData = {}) {
       return {
         emotion: "happy",
         title: "Stage 1 · Looking Great!",
-        message: "🎉 Your concept intake is coming along nicely! Click 'Select AI Specialist Agents' to assemble your AI founding team.",
-        actionLabel: "Proceed to Selection →",
-        suggestedAction: "proceed_select"
+        message: "🎉 Your concept intake is looking great! Click 'Generate 10-Agent Blueprint' to run all 10 specialized AI agents concurrently.",
+        actionLabel: "Generate Blueprint →",
+        suggestedAction: "proceed"
       };
     }
 
-    case "select": {
-      return {
-        emotion: "encouraging",
-        title: "Stage 2 · Agent Roster",
-        message: "🚀 Choose all 10 specialist agents (Market Research, Financial Model, Pitch Deck, Risk Audit) for a complete investor blueprint!",
-        actionLabel: "Select All 10 Agents",
-        suggestedAction: "select_all_agents"
-      };
-    }
-
+    case "select":
     case "results":
     case "dashboard": {
       return {

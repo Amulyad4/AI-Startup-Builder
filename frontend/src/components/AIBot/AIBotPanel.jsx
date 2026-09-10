@@ -82,11 +82,10 @@ export default function AIBotPanel({
     if (actionType === "preset" && go) {
       go("questions");
     } else if (actionType === "proceed" && go) {
-      if (currentRoute === "questions") go("select");
-      else if (currentRoute === "select") go("results");
+      if (currentRoute === "questions") go("results");
       else go("questions");
     } else if (actionType === "run_agents" && go) {
-      go("select");
+      go("results");
     }
   };
 

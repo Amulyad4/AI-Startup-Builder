@@ -27,9 +27,8 @@ const KEY_TO_PATH = {
   landing: "/",
   auth: "/auth",
   questions: "/idea",
-  select: "/idea/select",
   results: "/results",
-  dashboard: "/results",
+  dashboard: "/dashboard",
   history: "/history",
   settings: "/settings",
   profile: "/profile",
@@ -62,7 +61,7 @@ function AppContent() {
   });
 
   const go = (key) => navigate(KEY_TO_PATH[key] || "/");
-  const currentKey = PATH_TO_KEY[location.pathname] || "landing";
+  const currentKey = PATH_TO_KEY[location.pathname] || (location.pathname === "/results" ? "results" : "landing");
 
   useEffect(() => {
     if (user) {
@@ -80,7 +79,8 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
 
-  const isWorkspacePage = ["results", "dashboard", "settings", "profile", "history"].includes(currentKey);
+  // All authenticated pages use WorkspaceLayout with unified sidebar
+  const isWorkspacePage = ["results", "dashboard", "settings", "profile", "history", "questions"].includes(currentKey);
 
   return (
     <div className="min-h-screen text-text transition-colors duration-500">
@@ -93,16 +93,20 @@ function AppContent() {
               path="/"
               element={
                 <PageTransition>
-                  <LandingPage go={go} />
+                  <LandingPage go={go} user={user} />
                 </PageTransition>
               }
             />
             <Route
               path="/auth"
               element={
-                <PageTransition>
-                  <AuthPage go={go} setUser={setUser} />
-                </PageTransition>
+                user ? (
+                  <Navigate to="/dashboard" replace />
+                ) : (
+                  <PageTransition>
+                    <AuthPage go={go} setUser={setUser} />
+                  </PageTransition>
+                )
               }
             />
             <Route
@@ -117,13 +121,7 @@ function AppContent() {
             />
             <Route
               path="/idea/select"
-              element={
-                <RequireAuth user={user}>
-                  <PageTransition>
-                    <AgentSelectionPage go={go} user={user} />
-                  </PageTransition>
-                </RequireAuth>
-              }
+              element={<Navigate to="/results" replace />}
             />
             <Route
               path="/results"
@@ -150,7 +148,7 @@ function AppContent() {
               element={
                 <RequireAuth user={user}>
                   <PageTransition>
-                    <HistoryPage go={go} user={user} />
+                    <HistoryPage go={go} user={user} setUser={setUser} />
                   </PageTransition>
                 </RequireAuth>
               }

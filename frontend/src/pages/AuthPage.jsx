@@ -54,13 +54,13 @@ export default function AuthPage({ go, setUser }) {
       setSubmitting(false);
       const userName = isSignUp ? name.trim() : (email.split("@")[0] || "Founder");
       setUser({ name: userName, email: email.trim() || "founder@startup.com" });
-      go("questions");
+      go("dashboard");
     }, 500);
   };
 
   const handleOAuth = (provider) => {
     setUser({ name: `${provider} Founder`, email: `innovator@${provider.toLowerCase()}.com` });
-    go("questions");
+    go("dashboard");
   };
 
   return (

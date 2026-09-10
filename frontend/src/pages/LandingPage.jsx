@@ -18,7 +18,7 @@ const heroItem = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } },
 };
 
-export default function LandingPage({ go }) {
+export default function LandingPage({ go, user }) {
   const { dark } = useTheme();
 
   return (
@@ -63,21 +63,21 @@ export default function LandingPage({ go }) {
           {/* Action CTAs */}
           <motion.div variants={heroItem} className="flex flex-wrap items-center gap-4 pt-2">
             <MagneticButton
-              onClick={() => go("questions")}
+              onClick={() => go(user ? "dashboard" : "questions")}
               strength={8}
               className="group flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-white text-sm cursor-pointer shadow-cyber-cyan bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 border-none outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 hover:scale-[1.02] transition-transform"
             >
-              Start Idea Intake 
+              {user ? "Open Dashboard Hub" : "Start Idea Intake"} 
               <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
             </MagneticButton>
 
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              onClick={() => go("auth")}
+              onClick={() => go(user ? "dashboard" : "auth")}
               className="px-7 py-4 rounded-2xl font-bold border border-border text-text text-sm cursor-pointer bg-surface hover:bg-surfaceAlt hover:border-cyan-500/50 outline-none shadow-xs transition-all"
             >
-              Sign in to Console
+              {user ? "View Dashboard" : "Sign in to Console"}
             </motion.button>
           </motion.div>
 
@@ -149,8 +149,8 @@ export default function LandingPage({ go }) {
             },
             { 
               step: "02", 
-              title: "Module Selection & Run", 
-              desc: "Select which specialist agents to execute from the 10-agent neural roster.", 
+              title: "10-Agent Swarm Run", 
+              desc: "All 10 specialized AI agents autonomously analyze, calculate, and compile models.", 
               icon: Cpu
             },
             { 

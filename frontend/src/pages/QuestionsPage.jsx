@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Rocket, Sparkles, AlertCircle, Bot, Compass, Target, Users, Lightbulb, ArrowRight } from "lucide-react";
-import Footer from "../components/Footer";
-import { AGENTS, getAgentColor } from "../constants";
+import { Rocket, Sparkles, AlertCircle, Compass, Target, Users, ArrowRight } from "lucide-react";
+import WorkspaceLayout from "../components/WorkspaceLayout";
 import { useTheme } from "../context/ThemeContext";
 import { botEmotionManager } from "../components/AIBot/BotEmotionManager";
+import { AGENTS } from "../constants";
 
 export default function QuestionsPage({ go, user, setUser }) {
   const { dark } = useTheme();
@@ -25,11 +25,11 @@ export default function QuestionsPage({ go, user, setUser }) {
     }
   }, [startupIdea]);
 
-  const handleProceedToSelection = () => {
+  const handleGenerateBlueprint = () => {
     setErrorMsg("");
 
     if (!startupIdea || !startupIdea.trim()) {
-      setErrorMsg("Please describe your Startup Idea to proceed to agent selection.");
+      setErrorMsg("Please describe your Startup Idea to generate the blueprint.");
       botEmotionManager.setEmotion("concerned", 5000);
       return;
     }
@@ -42,33 +42,41 @@ export default function QuestionsPage({ go, user, setUser }) {
       audience: audience.trim(),
       industry: industry
     }));
+    // All 10 agents are active by default
+    localStorage.setItem("selected_agent_keys", JSON.stringify(AGENTS.map((a) => a.key)));
     
     setTimeout(() => {
-      go("select");
+      go("results");
     }, 250);
   };
 
   return (
-    <div className="flex flex-col min-h-screen font-body text-text relative bg-transparent">
-      <div className="flex-1 max-w-4xl mx-auto px-6 py-10 w-full space-y-6">
+    <WorkspaceLayout
+      go={go}
+      user={user}
+      setUser={setUser}
+      currentKey="questions"
+      title="IDEA INTAKE"
+    >
+      <div className="p-4 sm:p-6 md:p-8 max-w-4xl w-full mx-auto space-y-6 animate-fadeUp text-left">
         
         {/* Header Badge & Title */}
-        <div className="text-center animate-fadeUp space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primarySoft text-primary font-mono text-xs font-bold uppercase border border-primary/20 shadow-xs">
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 font-mono text-xs font-bold uppercase border border-cyan-500/20 shadow-xs">
             <Sparkles size={13} />
-            <span>STEP 1 OF 3 · SINGLE CONCEPT INTAKE</span>
+            <span>CONCEPT INTAKE · 10 SPECIALIST AGENTS</span>
           </div>
 
-          <h1 className="font-display text-3xl sm:text-4xl font-black tracking-tight text-text">
+          <h1 className="font-display text-2xl sm:text-3xl font-black tracking-tight text-text">
             Describe Your Startup Concept
           </h1>
           <p className="text-xs sm:text-sm text-textMuted max-w-xl mx-auto leading-relaxed">
-            Enter your idea context below. Next, you will select which AI specialist agents to run on your concept.
+            Enter your idea context below. All 10 specialized AI agents will autonomously generate your complete investor blueprint.
           </p>
         </div>
 
         {/* Main Intake Card */}
-        <div className="bento-card p-6 sm:p-8 rounded-3xl border border-border bg-surface shadow-xl relative overflow-hidden space-y-6 text-left animate-fadeUp">
+        <div className="bento-card p-6 sm:p-8 rounded-3xl border border-border bg-surface shadow-xl relative overflow-hidden space-y-6 text-left">
           
           {/* Error Notification */}
           {errorMsg && (
@@ -85,7 +93,7 @@ export default function QuestionsPage({ go, user, setUser }) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-text flex items-center gap-2">
-                <Sparkles size={15} className="text-primary" /> Startup Concept & Idea Description <span className="text-rose-500">*</span>
+                <Sparkles size={15} className="text-cyan-400" /> Startup Concept & Idea Description <span className="text-rose-500">*</span>
               </label>
               <span className="text-xs font-mono text-textMuted">
                 {startupIdea.length} chars
@@ -101,10 +109,10 @@ export default function QuestionsPage({ go, user, setUser }) {
                 setErrorMsg("");
               }}
               placeholder="e.g. An AI-powered direct-to-consumer supply chain platform that connects local organic farmers directly with urban restaurants, eliminating distributor markups..."
-              className="w-full p-4 rounded-2xl border border-border outline-none text-xs sm:text-sm bg-bgSoft transition-all text-text leading-relaxed placeholder:text-textMuted/50 focus:border-primary font-body"
+              className="w-full p-4 rounded-2xl border border-border outline-none text-xs sm:text-sm bg-surfaceAlt transition-all text-text leading-relaxed placeholder:text-textMuted/50 focus:border-cyan-400 font-body"
             />
             <p className="text-xs text-textMuted">
-              Describe your idea in prose. On the next screen, you will pick which agents should execute.
+              Describe your idea in prose. All 10 specialized AI agents will analyze your market, financials, risk matrix, and pitch deck.
             </p>
           </div>
 
@@ -112,26 +120,26 @@ export default function QuestionsPage({ go, user, setUser }) {
           <div className="grid sm:grid-cols-2 gap-4 pt-1">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text flex items-center gap-1.5">
-                <Target size={13} className="text-primary" /> Key Problem (Optional)
+                <Target size={13} className="text-cyan-400" /> Key Problem (Optional)
               </label>
               <input
                 type="text"
                 value={problem}
                 onChange={(e) => setProblem(e.target.value)}
                 placeholder="e.g. High middleman fees and delivery delays"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border outline-none text-xs bg-bgSoft text-text focus:border-primary transition-all font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-border outline-none text-xs bg-surfaceAlt text-text focus:border-cyan-400 transition-all font-medium"
               />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-text flex items-center gap-1.5">
-                <Users size={13} className="text-accent" /> Target Audience (Optional)
+                <Users size={13} className="text-purple-400" /> Target Audience (Optional)
               </label>
               <input
                 type="text"
                 value={audience}
                 onChange={(e) => setAudience(e.target.value)}
                 placeholder="e.g. Urban restaurant owners & organic suppliers"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-border outline-none text-xs bg-bgSoft text-text focus:border-primary transition-all font-medium"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-border outline-none text-xs bg-surfaceAlt text-text focus:border-cyan-400 transition-all font-medium"
               />
             </div>
           </div>
@@ -139,7 +147,7 @@ export default function QuestionsPage({ go, user, setUser }) {
           {/* Industry Sector Chips */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-text flex items-center gap-1.5">
-              <Compass size={13} className="text-primary" /> Industry Sector
+              <Compass size={13} className="text-cyan-400" /> Industry Sector
             </label>
             <div className="flex flex-wrap gap-2">
               {[
@@ -158,8 +166,8 @@ export default function QuestionsPage({ go, user, setUser }) {
                   onClick={() => setIndustry(opt)}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer outline-none ${
                     industry === opt
-                      ? "text-white border-transparent bg-primary shadow-xs font-bold"
-                      : "text-textMuted border-border bg-bgSoft hover:text-text hover:border-border-contrast"
+                      ? "text-white border-transparent bg-gradient-to-r from-cyan-500 to-indigo-600 shadow-xs font-bold"
+                      : "text-textMuted border-border bg-surfaceAlt hover:text-text hover:border-cyan-500/40"
                   }`}
                 >
                   {opt}
@@ -185,19 +193,17 @@ export default function QuestionsPage({ go, user, setUser }) {
 
             <button
               type="button"
-              onClick={handleProceedToSelection}
+              onClick={handleGenerateBlueprint}
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-7 py-3 rounded-xl text-xs sm:text-sm font-bold text-white shadow-md hover:shadow-primary/30 bg-gradient-to-r from-primary to-indigo-600 border-none outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50"
+              className="flex items-center gap-2 px-7 py-3 rounded-xl text-xs sm:text-sm font-bold text-white shadow-cyber-cyan bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 border-none outline-none cursor-pointer hover:scale-[1.02] transition-all disabled:opacity-50"
             >
-              Select AI Specialist Agents <ArrowRight size={16} />
+              <Rocket size={16} /> Generate 10-Agent Blueprint <ArrowRight size={16} />
             </button>
           </div>
 
         </div>
 
       </div>
-
-      <Footer go={go} />
-    </div>
+    </WorkspaceLayout>
   );
 }

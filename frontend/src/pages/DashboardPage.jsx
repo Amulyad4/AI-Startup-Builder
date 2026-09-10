@@ -8,8 +8,7 @@ import {
 } from "lucide-react";
 import { AGENTS, getAgentColor } from "../constants";
 import { useTheme } from "../context/ThemeContext";
-import ThemeToggle from "../components/ThemeToggle";
-import Logo from "../components/Logo";
+import WorkspaceLayout from "../components/WorkspaceLayout";
 import { generateDynamicAgentReports } from "../services/agentEngine";
 import { botEmotionManager } from "../components/AIBot/BotEmotionManager";
 
@@ -330,6 +329,13 @@ const SwarmEfficiencyMatrix = () => (
   </div>
 );
 
+const DEFAULT_STARTER_CONCEPT = {
+  idea: "Autonomous Multi-Agent Startup Acceleration Platform",
+  problem: "Founders spend weeks on fragmented market research, manual financial modeling, and competitor discovery.",
+  audience: "Early-stage founders, startup studios, venture creators, and product innovators.",
+  industry: "SaaS / B2B"
+};
+
 export default function DashboardPage({ go, user, setUser }) {
   const { dark } = useTheme();
 
@@ -350,11 +356,14 @@ export default function DashboardPage({ go, user, setUser }) {
     return AGENTS.map((a) => a.key);
   });
 
-  // Intake Data
+  // Intake Data - safely fallback to demo starter concept so dashboard is ALWAYS available
   const [intakeData] = useState(() => {
     const saved = localStorage.getItem("startup_intake");
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
+      try { 
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.idea) return parsed;
+      } catch (e) {}
     }
     const singleIdea = localStorage.getItem("startup_idea");
     if (singleIdea) {
@@ -368,21 +377,11 @@ export default function DashboardPage({ go, user, setUser }) {
     return null;
   });
 
-  // If no intake data at all, redirect to questions intake
-  React.useEffect(() => {
-    if (!intakeData || !intakeData.idea) {
-      go("questions");
-    }
-  }, [intakeData, go]);
+  const hasCustomIdea = Boolean(intakeData && intakeData.idea);
+  const safeIntake = hasCustomIdea ? intakeData : DEFAULT_STARTER_CONCEPT;
 
-  const safeIntake = intakeData || { idea: "", problem: "", audience: "", industry: "SaaS / B2B" };
   const [reports] = useState(() => generateDynamicAgentReports(safeIntake));
   const [copiedKey, setCopiedKey] = useState(null);
-  const [expandedKeys, setExpandedKeys] = useState(() => {
-    const init = {};
-    selectedAgentKeys.slice(0, 3).forEach(k => { init[k] = true; });
-    return init;
-  });
 
   // Automatically save current execution into startup_history
   React.useEffect(() => {
@@ -408,10 +407,6 @@ export default function DashboardPage({ go, user, setUser }) {
       localStorage.setItem("startup_history", JSON.stringify(list));
     } catch (e) {}
   }, [safeIntake, selectedAgentKeys]);
-
-  const toggleExpand = (key) => {
-    setExpandedKeys(prev => ({ ...prev, [key]: !prev[key] }));
-  };
 
   const copyToClipboard = (text, key) => {
     navigator.clipboard.writeText(text);
@@ -446,312 +441,182 @@ export default function DashboardPage({ go, user, setUser }) {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-text font-body flex flex-col relative overflow-x-hidden">
-      
-      {/* Background Dot Texture */}
-      <div className="absolute inset-0 bg-dot-texture opacity-15 pointer-events-none z-0" />
-
-      {/* Top Professional Workspace Header */}
-      <header className="sticky top-0 z-30 bg-surface/90 backdrop-blur-md border-b border-border px-6 py-3 flex items-center justify-between shadow-xs">
-        <div className="flex items-center gap-4">
-          <button onClick={() => go("landing")} className="cursor-pointer border-none bg-transparent outline-none">
-            <Logo />
-          </button>
-          <div className="h-4 w-[1px] bg-border hidden sm:block" />
-          <span className="font-mono text-xs text-textMuted hidden sm:flex items-center gap-1.5 font-bold">
-            <Sparkles size={14} className="text-cyan-400" /> WORKSPACE CONSOLE
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => go("select")}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-surface border border-border text-text hover:bg-surfaceAlt transition-all cursor-pointer shadow-xs hover:border-cyan-500/40"
-          >
-            <RefreshCw size={13} className="text-cyan-400" /> Re-run Agents
-          </button>
-
-          <button
-            onClick={downloadFullBlueprint}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 border-none outline-none cursor-pointer shadow-cyber-cyan hover:scale-[1.02] transition-all"
-          >
-            <Download size={13} /> Export Blueprint (.txt)
-          </button>
-
-          <ThemeToggle />
-
-          <button
-            onClick={() => go("profile")}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-surface hover:bg-surfaceAlt transition-all cursor-pointer outline-none hover:border-cyan-500/40"
-          >
-            <div className="w-5 h-5 rounded-md bg-gradient-to-br from-cyan-500 to-indigo-600 text-white flex items-center justify-center text-[10px] font-bold font-mono">
-              {(user?.name || "F").charAt(0).toUpperCase()}
-            </div>
-            <span className="text-xs font-semibold text-text max-w-[90px] truncate">{user?.name || "Founder"}</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Persistent Common Workspace Sidebar Navigation Layout */}
-      <div className="flex-1 flex overflow-hidden relative z-10">
+    <WorkspaceLayout
+      go={go}
+      user={user}
+      setUser={setUser}
+      currentKey="dashboard"
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      onExportBlueprint={downloadFullBlueprint}
+      title="DASHBOARD & INTELLIGENCE"
+    >
+      <div className="p-4 sm:p-6 md:p-8 max-w-6xl w-full mx-auto space-y-6 animate-fadeUp text-left">
         
-        {/* Common Sidebar Navigation */}
-        <aside className="w-64 border-r border-border bg-surface/70 backdrop-blur-md flex flex-col shrink-0">
-          <div className="p-4 space-y-1.5 border-b border-border">
-            <span className="font-mono text-[10px] font-bold text-textMuted tracking-widest uppercase block mb-2 px-2">
-              COMMON NAVIGATION
-            </span>
+        {/* Welcome Starter Banner if Fresh User */}
+        {!hasCustomIdea && (
+          <div className="bento-card p-6 rounded-3xl border border-cyan-500/40 bg-gradient-to-r from-cyan-500/10 via-indigo-500/10 to-purple-500/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-cyber-cyan">
+            <div className="space-y-1">
+              <span className="font-mono text-[10px] font-bold text-cyan-400 bg-cyan-500/20 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
+                ✨ GET STARTED WITH YOUR STARTUP
+              </span>
+              <h2 className="font-display text-lg sm:text-xl font-bold text-text">
+                Welcome to your AI Founder Workspace!
+              </h2>
+              <p className="text-xs text-textMuted leading-relaxed max-w-2xl">
+                You are currently viewing a live sample blueprint. Describe your own startup concept to have 10 AI specialist agents generate customized financial models, TAM/SAM analyses, and investor slides.
+              </p>
+            </div>
             
-            {[
-              { id: "questions", label: "Idea Intake", icon: Rocket, action: () => go("questions") },
-              { id: "select", label: "Agent Selection", icon: Sliders, action: () => go("select") },
-              { id: "results", label: "Results Thread", icon: MessageSquare, action: () => { go("results"); setActiveTab("results"); } },
-              { id: "analytics", label: "Analytics & Graphs", icon: BarChart3, action: () => { go("results"); setActiveTab("analytics"); } },
-              { id: "console", label: "Terminal Console", icon: Terminal, action: () => { go("results"); setActiveTab("console"); } },
-              { id: "matrix", label: "Swarm Efficiency", icon: Cpu, action: () => { go("results"); setActiveTab("matrix"); } },
-              { id: "history", label: "Past History", icon: History, action: () => go("history") },
-              { id: "profile", label: "Founder Profile", icon: User, action: () => go("profile") },
-              { id: "settings", label: "Workspace Settings", icon: Settings, action: () => go("settings") }
-            ].map((item) => {
-              const ItemIcon = item.icon;
-              const isCurrentPage = activeTab === item.id || (item.id === "results" && activeTab === "results");
-              return (
-                <button
-                  key={item.id}
-                  onClick={item.action}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border text-left outline-none ${
-                    isCurrentPage
-                      ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 shadow-xs"
-                      : "text-textMuted border-transparent hover:text-text hover:bg-surfaceAlt"
-                  }`}
-                >
-                  <ItemIcon size={16} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
+            <button
+              onClick={() => go("questions")}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 border-none outline-none cursor-pointer shadow-cyber-cyan hover:scale-[1.02] transition-all shrink-0"
+            >
+              <Rocket size={14} /> Start Idea Intake
+            </button>
+          </div>
+        )}
+
+        {/* Active Concept Banner */}
+        <div className="bento-card p-6 rounded-3xl border border-border bg-surface flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
+                {hasCustomIdea ? "ACTIVE CONCEPT ANALYSIS" : "STARTER DEMO CONCEPT"}
+              </span>
+              <span className="font-mono text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                100% READY
+              </span>
+            </div>
+            <h1 className="font-display text-xl sm:text-2xl font-bold text-text">
+              "{safeIntake.idea}"
+            </h1>
+            <p className="text-xs text-textMuted font-mono">
+              Sector: <strong className="text-text font-bold">{safeIntake.industry || "SaaS / B2B"}</strong> · Executed {selectedAgentsList.length} Specialist Agents
+            </p>
           </div>
 
-          {/* Executed Agents Quick List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2 text-left">
-            <span className="font-mono text-[10px] font-bold text-textMuted tracking-widest uppercase block mb-1">
-              EXECUTED AGENTS ({selectedAgentsList.length})
-            </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => go("questions")}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-surfaceAlt border border-border text-text hover:bg-border transition-all cursor-pointer"
+            >
+              <Rocket size={14} className="text-cyan-400" /> New Idea
+            </button>
+            <button
+              onClick={() => go("history")}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-surfaceAlt border border-border text-text hover:bg-border transition-all cursor-pointer"
+            >
+              <History size={14} /> History
+            </button>
+          </div>
+        </div>
 
-            {selectedAgentsList.map((a) => {
-              const Icon = a.icon;
-              const agentColor = getAgentColor(a.key, dark);
+        {/* TAB 1: RESULTS THREAD STREAM */}
+        {activeTab === "results" && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-xs font-bold text-cyan-400 uppercase tracking-widest bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+                RESULTS THREAD ({selectedAgentsList.length} MESSAGES)
+              </span>
+              <div className="h-[1px] flex-1 bg-border" />
+            </div>
+
+            {selectedAgentsList.map((agent) => {
+              const Icon = agent.icon;
+              const agentColor = getAgentColor(agent.key, dark);
+              const reportText = reports[agent.key] || "";
+              const dynamicFlashcards = getFlashcardStats(safeIntake);
+              const stats = dynamicFlashcards[agent.key] || null;
 
               return (
                 <div
-                  key={a.key}
-                  className="flex items-center justify-between p-2 rounded-xl border border-border bg-surface hover:border-cyan-500/40 transition-all"
-                  style={{ borderLeftColor: agentColor, borderLeftWidth: "3px" }}
+                  key={agent.key}
+                  className="bento-card rounded-3xl border bg-surface overflow-hidden shadow-xs transition-all text-left space-y-4 p-6 hover:border-cyan-500/40"
+                  style={{ borderLeft: `4px solid ${agentColor}` }}
                 >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div
-                      className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${agentColor}18`, color: agentColor }}
-                    >
-                      <Icon size={12} />
+                  <div className="flex items-center justify-between border-b border-border pb-4">
+                    <div className="flex items-center gap-3.5">
+                      <div
+                        className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-xs shrink-0"
+                        style={{ backgroundColor: `${agentColor}18`, color: agentColor }}
+                      >
+                        <Icon size={20} />
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold" style={{ color: agentColor }}>
+                            {agent.tag}
+                          </span>
+                          <span className="font-mono text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            ● COMPLETE
+                          </span>
+                        </div>
+                        <h3 className="font-display font-bold text-lg text-text">
+                          {agent.name}
+                        </h3>
+                      </div>
                     </div>
-                    <span className="font-mono text-[10px] font-bold truncate text-text">
-                      {a.name}
-                    </span>
+
+                    <button
+                      onClick={() => copyToClipboard(reportText, agent.key)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-bold bg-surfaceAlt text-text hover:bg-border transition-all cursor-pointer"
+                    >
+                      {copiedKey === agent.key ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                      {copiedKey === agent.key ? "Copied" : "Copy"}
+                    </button>
                   </div>
 
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                  {stats && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                      {stats.map((s, sIdx) => {
+                        const StatIcon = s.icon;
+                        return (
+                          <div key={sIdx} className="p-3.5 rounded-2xl bg-surfaceAlt border border-border space-y-1 hover:border-cyan-500/30 transition-all">
+                            <div className="flex items-center justify-between text-textMuted">
+                              <span className="font-mono text-[10px] font-bold uppercase">{s.label}</span>
+                              <StatIcon size={13} style={{ color: s.color }} />
+                            </div>
+                            <span className="font-display font-extrabold text-sm sm:text-base text-text block">
+                              {s.value}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {agent.key === "pitchDeck" && (
+                    <PitchDeckSlidePreview intakeData={safeIntake} />
+                  )}
+
+                  {/* Rich Formatted Markdown Output - Sized naturally as per content */}
+                  <div className="p-5 rounded-2xl bg-surfaceAlt border border-border font-body text-xs text-text leading-relaxed">
+                    {renderFormattedText(reportText)}
+                  </div>
                 </div>
               );
             })}
           </div>
-        </aside>
+        )}
 
-        {/* Main Content Workspace Panel */}
-        <main className="flex-1 flex flex-col min-w-0 overflow-y-auto p-6 max-w-6xl w-full mx-auto space-y-6 animate-fadeUp text-left">
-          
-          {/* Active Concept Banner */}
-          <div className="bento-card p-6 rounded-3xl border border-border bg-surface flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
-            <div className="space-y-1">
-              <span className="font-mono text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
-                ACTIVE CONCEPT ANALYSIS
-              </span>
-              <h1 className="font-display text-xl sm:text-2xl font-bold text-text">
-                "{intakeData.idea}"
-              </h1>
-              <p className="text-xs text-textMuted font-mono">
-                Sector: <strong className="text-text font-bold">{intakeData.industry || "SaaS / B2B"}</strong> · Executed {selectedAgentsList.length} Specialist Agents
-              </p>
-            </div>
+        {/* TAB 2: ANALYTICS & CHARTS */}
+        {activeTab === "analytics" && (
+          <AnalyticsVisuals intakeData={safeIntake} />
+        )}
 
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={() => go("history")}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-surfaceAlt border border-border text-text hover:bg-border transition-all cursor-pointer"
-              >
-                <History size={14} /> History
-              </button>
-            </div>
-          </div>
+        {/* TAB 3: TERMINAL CONSOLE LOGS */}
+        {activeTab === "console" && (
+          <SwarmTerminalConsole reports={reports} selectedAgentsList={selectedAgentsList} />
+        )}
 
-          {/* VIEW SWITCHER TABS */}
-          <div className="flex bg-surface p-1.5 rounded-2xl border border-border shadow-xs max-w-xl font-mono text-xs font-bold">
-            {[
-              { id: "results", label: "Results Thread", icon: MessageSquare },
-              { id: "analytics", label: "Analytics & Graphs", icon: BarChart3 },
-              { id: "console", label: "Terminal Console", icon: Terminal },
-              { id: "matrix", label: "Swarm Efficiency", icon: Cpu }
-            ].map((tab) => {
-              const TabIcon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex-1 py-2 px-3 rounded-xl transition-all cursor-pointer border-none outline-none flex items-center justify-center gap-1.5 ${
-                    isActive
-                      ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-xs"
-                      : "text-textMuted hover:text-text hover:bg-surfaceAlt"
-                  }`}
-                >
-                  <TabIcon size={14} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+        {/* TAB 4: SWARM EFFICIENCY MATRIX */}
+        {activeTab === "matrix" && (
+          <SwarmEfficiencyMatrix />
+        )}
 
-          {/* TAB 1: RESULTS THREAD STREAM (WITH PARSED MARKDOWN FORMATTING) */}
-          {activeTab === "results" && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-xs font-bold text-cyan-400 uppercase tracking-widest bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
-                  RESULTS THREAD ({selectedAgentsList.length} MESSAGES)
-                </span>
-                <div className="h-[1px] flex-1 bg-border" />
-              </div>
-
-              {selectedAgentsList.map((agent) => {
-                const Icon = agent.icon;
-                const agentColor = getAgentColor(agent.key, dark);
-                const isExpanded = expandedKeys[agent.key];
-                const reportText = reports[agent.key] || "";
-                const dynamicFlashcards = getFlashcardStats(safeIntake);
-                const stats = dynamicFlashcards[agent.key] || null;
-
-                return (
-                  <div
-                    key={agent.key}
-                    className="bento-card rounded-3xl border bg-surface overflow-hidden shadow-xs transition-all text-left space-y-4 p-6 hover:border-cyan-500/40"
-                    style={{ borderLeft: `4px solid ${agentColor}` }}
-                  >
-                    <div className="flex items-center justify-between border-b border-border pb-4">
-                      <div className="flex items-center gap-3.5">
-                        <div
-                          className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-xs shrink-0"
-                          style={{ backgroundColor: `${agentColor}18`, color: agentColor }}
-                        >
-                          <Icon size={20} />
-                        </div>
-
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs font-bold" style={{ color: agentColor }}>
-                              {agent.tag}
-                            </span>
-                            <span className="font-mono text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                              ● COMPLETE
-                            </span>
-                          </div>
-                          <h3 className="font-display font-bold text-lg text-text">
-                            {agent.name}
-                          </h3>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => copyToClipboard(reportText, agent.key)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border text-xs font-bold bg-surfaceAlt text-text hover:bg-border transition-all cursor-pointer"
-                        >
-                          {copiedKey === agent.key ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
-                          {copiedKey === agent.key ? "Copied" : "Copy"}
-                        </button>
-
-                        <button
-                          onClick={() => toggleExpand(agent.key)}
-                          className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border text-xs font-bold bg-surfaceAlt text-text hover:bg-border transition-all cursor-pointer"
-                        >
-                          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                          {isExpanded ? "Collapse" : "Expand"}
-                        </button>
-                      </div>
-                    </div>
-
-                    {stats && (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-                        {stats.map((s, sIdx) => {
-                          const StatIcon = s.icon;
-                          return (
-                            <div key={sIdx} className="p-3.5 rounded-2xl bg-surfaceAlt border border-border space-y-1 hover:border-cyan-500/30 transition-all">
-                              <div className="flex items-center justify-between text-textMuted">
-                                <span className="font-mono text-[10px] font-bold uppercase">{s.label}</span>
-                                <StatIcon size={13} style={{ color: s.color }} />
-                              </div>
-                              <span className="font-display font-extrabold text-sm sm:text-base text-text block">
-                                {s.value}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {agent.key === "pitchDeck" && (
-                      <PitchDeckSlidePreview intakeData={safeIntake} />
-                    )}
-
-                    {/* Rich Formatted Markdown Output (NO RAW ** ASTERISKS) */}
-                    <div className={`p-5 rounded-2xl bg-surfaceAlt border border-border font-body text-xs text-text leading-relaxed ${
-                      !isExpanded ? "line-clamp-6" : ""
-                    }`}>
-                      {renderFormattedText(reportText)}
-                    </div>
-
-                    {!isExpanded && (
-                      <div className="text-center pt-1">
-                        <button
-                          onClick={() => toggleExpand(agent.key)}
-                          className="text-xs font-bold text-cyan-400 hover:underline border-none bg-transparent cursor-pointer"
-                        >
-                          Show Full {agent.name} Report ↓
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* TAB 2: ANALYTICS & CHARTS */}
-          {activeTab === "analytics" && (
-            <AnalyticsVisuals intakeData={safeIntake} />
-          )}
-
-          {/* TAB 3: TERMINAL CONSOLE LOGS */}
-          {activeTab === "console" && (
-            <SwarmTerminalConsole reports={reports} selectedAgentsList={selectedAgentsList} />
-          )}
-
-          {/* TAB 4: SWARM EFFICIENCY MATRIX */}
-          {activeTab === "matrix" && (
-            <SwarmEfficiencyMatrix />
-          )}
-
-        </main>
       </div>
-
-    </div>
+    </WorkspaceLayout>
   );
 }

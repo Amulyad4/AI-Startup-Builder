@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { 
-  Settings, Check, Cpu, LayoutDashboard, Key, Bell, Shield, Trash2, LogOut, ChevronRight
+  Settings, Check, Cpu, Trash2, LogOut, Shield
 } from "lucide-react";
 import { AGENTS, getAgentColor } from "../constants";
 import { useTheme } from "../context/ThemeContext";
-import Logo from "../components/Logo";
+import WorkspaceLayout from "../components/WorkspaceLayout";
 import ThemeToggle from "../components/ThemeToggle";
-import Footer from "../components/Footer";
 
 export default function AgentSettingsPage({ go, user, setUser }) {
   const { dark } = useTheme();
@@ -30,43 +29,21 @@ export default function AgentSettingsPage({ go, user, setUser }) {
   };
 
   return (
-    <div className="min-h-screen bg-transparent text-text font-body flex flex-col relative overflow-x-hidden">
-      
-      {/* Background Dot Texture */}
-      <div className="absolute inset-0 bg-dot-texture opacity-15 pointer-events-none z-0" />
-
-      {/* Header */}
-      <header className="sticky top-0 z-30 bg-surface/90 backdrop-blur-md border-b border-border px-6 py-3 flex items-center justify-between shadow-xs">
-        <div className="flex items-center gap-4">
-          <button onClick={() => go("landing")} className="cursor-pointer border-none bg-transparent outline-none">
-            <Logo />
-          </button>
-          <div className="h-4 w-[1px] bg-border hidden sm:block" />
-          <span className="font-mono text-xs text-textMuted hidden sm:flex items-center gap-1.5 font-bold">
-            <Settings size={14} className="text-primary" /> WORKSPACE SETTINGS
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <ThemeToggle />
-          <button
-            onClick={() => go("questions")}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-primary to-indigo-600 border-none cursor-pointer shadow-xs hover:shadow-primary/30 transition-all"
-          >
-            Idea Intake
-          </button>
-        </div>
-      </header>
-
-      {/* Main Layout */}
-      <div className="flex-1 max-w-5xl w-full mx-auto p-6 md:p-8 relative z-10 space-y-8 animate-fadeUp text-left">
+    <WorkspaceLayout
+      go={go}
+      user={user}
+      setUser={setUser}
+      currentKey="settings"
+      title="WORKSPACE SETTINGS"
+    >
+      <div className="p-4 sm:p-6 md:p-8 max-w-5xl w-full mx-auto space-y-8 animate-fadeUp text-left">
         
         <div className="border-b border-border pb-4 space-y-1">
-          <h1 className="font-display text-3xl font-black text-text flex items-center gap-3">
-            <Settings size={28} className="text-primary" /> Workspace Settings
+          <h1 className="font-display text-2xl sm:text-3xl font-black text-text flex items-center gap-3">
+            <Settings size={26} className="text-cyan-400" /> Workspace Settings
           </h1>
           <p className="text-xs sm:text-sm text-textMuted leading-relaxed">
-            Manage account defaults, theme options, export preferences, and read-only agent roster specs.
+            Manage account defaults, theme options, export preferences, and view agent roster specifications.
           </p>
         </div>
 
@@ -78,7 +55,7 @@ export default function AgentSettingsPage({ go, user, setUser }) {
             {/* Safe Preferences Card */}
             <div className="bento-card p-6 sm:p-8 rounded-3xl border border-border bg-surface space-y-6 shadow-xs">
               <h3 className="font-display font-bold text-base text-text flex items-center gap-2 border-b border-border pb-4">
-                <Settings size={18} className="text-primary" /> General Workspace Defaults
+                <Settings size={18} className="text-cyan-400" /> General Workspace Defaults
               </h3>
 
               <div className="space-y-4">
@@ -90,7 +67,7 @@ export default function AgentSettingsPage({ go, user, setUser }) {
                   <select
                     value={exportFormat}
                     onChange={(e) => setExportFormat(e.target.value)}
-                    className="px-3.5 py-2 rounded-xl border border-border bg-bgSoft text-xs font-mono font-bold text-text outline-none"
+                    className="px-3.5 py-2 rounded-xl border border-border bg-surfaceAlt text-xs font-mono font-bold text-text outline-none focus:border-cyan-400"
                   >
                     <option value="txt">Formatted Text (.txt)</option>
                     <option value="md">Markdown Document (.md)</option>
@@ -106,7 +83,7 @@ export default function AgentSettingsPage({ go, user, setUser }) {
                     type="checkbox"
                     checked={autoSave}
                     onChange={(e) => setAutoSave(e.target.checked)}
-                    className="w-5 h-5 accent-primary cursor-pointer"
+                    className="w-5 h-5 accent-cyan-500 cursor-pointer"
                   />
                 </div>
 
@@ -119,7 +96,7 @@ export default function AgentSettingsPage({ go, user, setUser }) {
                     type="checkbox"
                     checked={notifyAlerts}
                     onChange={(e) => setNotifyAlerts(e.target.checked)}
-                    className="w-5 h-5 accent-primary cursor-pointer"
+                    className="w-5 h-5 accent-cyan-500 cursor-pointer"
                   />
                 </div>
 
@@ -135,7 +112,7 @@ export default function AgentSettingsPage({ go, user, setUser }) {
               <div className="pt-2 flex justify-end">
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs text-white bg-primary border-none cursor-pointer shadow-xs"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 border-none cursor-pointer shadow-cyber-cyan hover:scale-[1.02] transition-all"
                 >
                   {savedSuccess ? <Check size={14} /> : null}
                   {savedSuccess ? "Saved Successfully" : "Save Preferences"}
@@ -148,13 +125,13 @@ export default function AgentSettingsPage({ go, user, setUser }) {
               <div className="flex items-center justify-between border-b border-border pb-4">
                 <div>
                   <h3 className="font-display font-bold text-base text-text flex items-center gap-2">
-                    <Cpu size={18} className="text-primary" /> Specialist Agent Directory (Read-Only)
+                    <Cpu size={18} className="text-cyan-400" /> Specialist Agent Directory (Read-Only)
                   </h3>
                   <p className="text-xs text-textMuted mt-0.5">
                     10 developer-configured specialist modules (backend-driven).
                   </p>
                 </div>
-                <span className="font-mono text-[10px] font-bold text-primary bg-primarySoft px-2.5 py-1 rounded-full border border-primary/20">
+                <span className="font-mono text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded-full border border-cyan-500/20">
                   FIXED ROSTER
                 </span>
               </div>
@@ -164,7 +141,7 @@ export default function AgentSettingsPage({ go, user, setUser }) {
                   const Icon = a.icon;
                   const agentColor = getAgentColor(a.key, dark);
                   return (
-                    <div key={a.key} className="p-3.5 rounded-2xl bg-bgSoft border border-border space-y-1">
+                    <div key={a.key} className="p-3.5 rounded-2xl bg-surfaceAlt border border-border space-y-1">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-md flex items-center justify-center text-xs" style={{ backgroundColor: `${agentColor}18`, color: agentColor }}>
                           <Icon size={14} />
@@ -214,7 +191,7 @@ export default function AgentSettingsPage({ go, user, setUser }) {
           <div className="space-y-6">
             <div className="bento-card p-6 rounded-3xl border border-border bg-surface space-y-4">
               <h3 className="font-display font-bold text-sm text-text flex items-center gap-2">
-                <Shield size={16} className="text-primary" /> Workspace System Info
+                <Shield size={16} className="text-cyan-400" /> Workspace System Info
               </h3>
               <div className="space-y-2 font-mono text-xs text-textMuted">
                 <div className="flex justify-between">
@@ -223,11 +200,11 @@ export default function AgentSettingsPage({ go, user, setUser }) {
                 </div>
                 <div className="flex justify-between">
                   <span>Specialists</span>
-                  <strong className="text-emerald-500">10 Modules Online</strong>
+                  <strong className="text-emerald-400">10 Modules Online</strong>
                 </div>
                 <div className="flex justify-between">
                   <span>Storage</span>
-                  <strong className="text-primary">Local Storage Caching</strong>
+                  <strong className="text-cyan-400">Local Cache Active</strong>
                 </div>
               </div>
             </div>
@@ -236,8 +213,6 @@ export default function AgentSettingsPage({ go, user, setUser }) {
         </div>
 
       </div>
-
-      <Footer go={go} />
-    </div>
+    </WorkspaceLayout>
   );
 }

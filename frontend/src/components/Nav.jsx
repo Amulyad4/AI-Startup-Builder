@@ -15,14 +15,14 @@ export default function Nav({ go, current, user, setUser }) {
   });
 
   const links = [
-    { id: "landing", label: "Overview" },
     ...(user ? [
+      { id: "dashboard", label: "Dashboard" },
       { id: "questions", label: "Idea Intake" },
-      { id: "select", label: "Select Agents" },
-      { id: "results", label: "Results Thread" },
       { id: "history", label: "History" },
-      { id: "profile", label: "Profile" }
+      { id: "profile", label: "Profile" },
+      { id: "landing", label: "Overview" },
     ] : [
+      { id: "landing", label: "Overview" },
       { id: "auth", label: "Sign in" }
     ]),
   ];
@@ -42,8 +42,9 @@ export default function Nav({ go, current, user, setUser }) {
       >
         {/* Brand Logo */}
         <button
-          onClick={() => go("landing")}
+          onClick={() => go(user ? "dashboard" : "landing")}
           className="cursor-pointer border-none bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+          title={user ? "Go to Dashboard" : "Home"}
         >
           <Logo />
         </button>
