@@ -48,8 +48,12 @@ export default function ProfilePage({ go, user, setUser }) {
           <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
             
             {/* Avatar Circle */}
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-500 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-display font-extrabold text-3xl shadow-cyber-cyan shrink-0">
-              {(user?.name || "F").charAt(0).toUpperCase()}
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-500 via-indigo-600 to-purple-600 text-white flex items-center justify-center font-display font-extrabold text-3xl shadow-cyber-cyan shrink-0 overflow-hidden border border-border">
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />
+              ) : (
+                (user?.name || "F").charAt(0).toUpperCase()
+              )}
             </div>
 
             <div className="space-y-1">

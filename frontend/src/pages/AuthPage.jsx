@@ -1,17 +1,13 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles, User, AlertCircle, CheckCircle2, ShieldCheck, Terminal, Cpu, Bot, Users } from "lucide-react";
+import {
+  Mail, Lock, Eye, EyeOff, ArrowRight, X,
+  User, AlertCircle, Bot,
+} from "lucide-react";
 import Footer from "../components/Footer";
 import authImg from "../assets/auth_ai_bots.png";
-
-const GoogleIcon = (props) => (
-  <svg viewBox="0 0 24 24" width="16" height="16" {...props}>
-    <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" />
-    <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
-    <path fill="#FBBC05" d="M5.6 14.8c-.3-.8-.4-1.8-.4-2.8s.1-2 .4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z" />
-    <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z" />
-  </svg>
-);
+import { registerUser, loginUser, oauthLoginUser } from "../services/api";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 const GithubIcon = (props) => (
   <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" {...props}>
@@ -19,16 +15,155 @@ const GithubIcon = (props) => (
   </svg>
 );
 
+/**
+ * GitHub Modal for social sign-in
+ */
+function GitHubModal({ isOpen, onClose, onConfirm, submitting }) {
+  const [oauthName, setOauthName] = useState("");
+  const [oauthEmail, setOauthEmail] = useState("");
+  const [errs, setErrs] = useState({});
+
+  const validate = () => {
+    const e = {};
+    if (!oauthEmail || !oauthEmail.includes("@")) e.email = "Valid email required";
+    if (!oauthName || !oauthName.trim()) e.name = "Full name required";
+    setErrs(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = (ev) => {
+    ev.preventDefault();
+    if (!validate()) return;
+    onConfirm(oauthEmail.trim(), oauthName.trim());
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+          />
+
+          <motion.div
+            className="relative z-10 w-full max-w-sm bg-surface border border-border rounded-3xl shadow-2xl p-7 space-y-5"
+            initial={{ scale: 0.92, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.92, opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 320, damping: 28 }}
+          >
+            <button
+              onClick={onClose}
+              className="absolute top-4 right-4 text-textMuted hover:text-text transition-colors border-none bg-transparent cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-surfaceAlt border border-border flex items-center justify-center text-text">
+                <GithubIcon />
+              </div>
+              <div>
+                <h2 className="font-display text-base font-bold text-text">
+                  Continue with GitHub
+                </h2>
+                <p className="text-[11px] text-textMuted">
+                  Confirm your developer profile
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text">Full Name</label>
+                <div className="relative">
+                  <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-textMuted" />
+                  <input
+                    type="text"
+                    value={oauthName}
+                    onChange={(e) => {
+                      setOauthName(e.target.value);
+                      if (errs.name) setErrs((p) => ({ ...p, name: null }));
+                    }}
+                    placeholder="Sarah Connor"
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border outline-none text-xs bg-bg text-text transition-all font-medium ${errs.name ? "border-rose-500" : "border-border focus:border-cyan-400"
+                      }`}
+                  />
+                </div>
+                {errs.name && (
+                  <p className="text-[11px] text-rose-500 font-semibold flex items-center gap-1">
+                    <AlertCircle size={12} /> {errs.name}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-text">
+                  GitHub Email Address
+                </label>
+                <div className="relative">
+                  <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-textMuted" />
+                  <input
+                    type="email"
+                    value={oauthEmail}
+                    onChange={(e) => {
+                      setOauthEmail(e.target.value);
+                      if (errs.email) setErrs((p) => ({ ...p, email: null }));
+                    }}
+                    placeholder="developer@github.com"
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border outline-none text-xs bg-bg text-text transition-all font-medium ${errs.email ? "border-rose-500" : "border-border focus:border-cyan-400"
+                      }`}
+                  />
+                </div>
+                {errs.email && (
+                  <p className="text-[11px] text-rose-500 font-semibold flex items-center gap-1">
+                    <AlertCircle size={12} /> {errs.email}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3 rounded-xl font-bold text-white text-xs transition-all cursor-pointer shadow-cyber-cyan bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 border-none outline-none flex items-center justify-center gap-2 disabled:opacity-60 hover:scale-[1.01]"
+              >
+                {submitting ? (
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <GithubIcon />
+                    Sign in with GitHub <ArrowRight size={14} />
+                  </>
+                )}
+              </button>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function AuthPage({ go, setUser }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPw, setShowPw] = useState(false);
-  
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // GitHub modal state
+  const [githubModalOpen, setGithubModalOpen] = useState(false);
 
   const validateForm = () => {
     const errs = {};
@@ -45,32 +180,109 @@ export default function AuthPage({ go, setUser }) {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError("");
     if (!validateForm()) return;
 
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      let data;
+      if (isSignUp) {
+        data = await registerUser(email.trim(), name.trim(), password);
+      } else {
+        data = await loginUser(email.trim(), password);
+      }
+
+      setUser({
+        id: data.id,
+        name: data.full_name,
+        email: data.email,
+        provider: data.provider,
+        avatar_url: data.avatar_url,
+        token: data.token,
+      });
+
+      go("questions");
+    } catch (err) {
+      setServerError(err.message || "Authentication failed. Please try again.");
+    } finally {
       setSubmitting(false);
-      const userName = isSignUp ? name.trim() : (email.split("@")[0] || "Founder");
-      setUser({ name: userName, email: email.trim() || "founder@startup.com" });
-      go("dashboard");
-    }, 500);
+    }
   };
 
-  const handleOAuth = (provider) => {
-    setUser({ name: `${provider} Founder`, email: `innovator@${provider.toLowerCase()}.com` });
-    go("dashboard");
+  // Called when Google login completes (either real Google popup or authentic Chooser)
+  const handleGoogleSuccess = async (googleUser) => {
+    setSubmitting(true);
+    setServerError("");
+    try {
+      const data = await oauthLoginUser(
+        googleUser.email,
+        googleUser.name,
+        "google",
+        googleUser.avatar
+      );
+      setUser({
+        id: data.id,
+        name: data.full_name,
+        email: data.email,
+        provider: data.provider,
+        avatar_url: data.avatar_url || googleUser.avatar,
+        token: data.token,
+      });
+      go("questions");
+    } catch (err) {
+      setServerError(err.message || "Failed to sign in with Google.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // GitHub Confirm
+  const handleGitHubConfirm = async (oauthEmail, oauthName) => {
+    setSubmitting(true);
+    setServerError("");
+    try {
+      const avatarUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(oauthName)}`;
+      const data = await oauthLoginUser(
+        oauthEmail,
+        oauthName,
+        "github",
+        avatarUrl
+      );
+      setUser({
+        id: data.id,
+        name: data.full_name,
+        email: data.email,
+        provider: data.provider,
+        avatar_url: data.avatar_url || avatarUrl,
+        token: data.token,
+      });
+      setGithubModalOpen(false);
+      go("questions");
+    } catch (err) {
+      setServerError(err.message || "Failed to sign in with GitHub");
+      setGithubModalOpen(false);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className="flex flex-col min-h-screen font-body text-text bg-bg">
+      {/* GitHub Modal */}
+      <GitHubModal
+        isOpen={githubModalOpen}
+        onClose={() => setGithubModalOpen(false)}
+        onConfirm={handleGitHubConfirm}
+        submitting={submitting}
+      />
+
       <div className="flex-1 grid lg:grid-cols-2 min-h-full">
-        
         {/* LEFT COLUMN: Comic AI Bots Working Side Panel */}
         <div className="hidden lg:flex flex-col items-center justify-center relative p-12 border-r border-border bg-surface/40 backdrop-blur-md overflow-hidden space-y-6">
           <div className="absolute inset-0 bg-dot-texture opacity-15 pointer-events-none" />
-          
+
           <div className="w-full max-w-lg z-10 space-y-4">
             <div className="relative group rounded-3xl overflow-hidden border border-border bg-surface shadow-2xl p-2.5 transition-all duration-300 hover:border-cyan-500/50 hover:shadow-cyber-cyan">
               <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-cyan-500/20 via-indigo-500/20 to-purple-500/20 blur-xl opacity-75 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -98,7 +310,7 @@ export default function AuthPage({ go, setUser }) {
         {/* RIGHT COLUMN: Auth Panel */}
         <div className="flex items-center justify-center p-6 sm:p-12 relative z-10">
           <div className="w-full max-w-md bg-surface border border-border p-8 rounded-3xl shadow-xl space-y-6 text-left animate-fadeUp hover:border-cyan-500/30 transition-all">
-            
+
             {/* Sign In vs Create Account Tabs */}
             <div className="flex bg-surfaceAlt p-1 rounded-2xl border border-border">
               <button
@@ -106,12 +318,12 @@ export default function AuthPage({ go, setUser }) {
                 onClick={() => {
                   setIsSignUp(false);
                   setErrors({});
+                  setServerError("");
                 }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer border-none outline-none ${
-                  !isSignUp
-                    ? "bg-surface text-text shadow-sm"
-                    : "text-textMuted hover:text-text"
-                }`}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer border-none outline-none ${!isSignUp
+                  ? "bg-surface text-text shadow-sm"
+                  : "text-textMuted hover:text-text"
+                  }`}
               >
                 Sign In
               </button>
@@ -120,12 +332,12 @@ export default function AuthPage({ go, setUser }) {
                 onClick={() => {
                   setIsSignUp(true);
                   setErrors({});
+                  setServerError("");
                 }}
-                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer border-none outline-none ${
-                  isSignUp
-                    ? "bg-surface text-text shadow-sm"
-                    : "text-textMuted hover:text-text"
-                }`}
+                className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer border-none outline-none ${isSignUp
+                  ? "bg-surface text-text shadow-sm"
+                  : "text-textMuted hover:text-text"
+                  }`}
               >
                 Create Account
               </button>
@@ -143,19 +355,30 @@ export default function AuthPage({ go, setUser }) {
               </p>
             </div>
 
-            {/* OAuth Buttons */}
+            {/* Server Error Alert */}
+            {serverError && (
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-start gap-2 animate-fadeIn">
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                <span>{serverError}</span>
+              </div>
+            )}
+
+            {/* Google & GitHub OAuth Buttons */}
             <div className="space-y-2.5">
+              {/* Authentic Google Sign In Button */}
+              <GoogleSignInButton
+                onAuthSuccess={handleGoogleSuccess}
+                onError={(err) => setServerError(err)}
+                disabled={submitting}
+                savedUserEmail={email}
+              />
+
+              {/* GitHub Button */}
               <button
                 type="button"
-                onClick={() => handleOAuth("Google")}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-border bg-surface hover:bg-surfaceAlt text-text text-xs font-semibold outline-none cursor-pointer shadow-xs hover:border-cyan-500/40 transition-all"
-              >
-                <GoogleIcon /> Continue with Google
-              </button>
-              <button
-                type="button"
-                onClick={() => handleOAuth("GitHub")}
-                className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl border border-border bg-surface hover:bg-surfaceAlt text-text text-xs font-semibold outline-none cursor-pointer shadow-xs hover:border-cyan-500/40 transition-all"
+                onClick={() => setGithubModalOpen(true)}
+                disabled={submitting}
+                className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl border border-border bg-surface hover:bg-surfaceAlt text-text text-xs font-semibold outline-none cursor-pointer shadow-xs hover:border-cyan-500/40 transition-all disabled:opacity-60"
               >
                 <GithubIcon /> Continue with GitHub
               </button>
@@ -167,7 +390,7 @@ export default function AuthPage({ go, setUser }) {
               <div className="h-[1px] flex-1 bg-border" />
             </div>
 
-            {/* Form */}
+            {/* Email Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <AnimatePresence mode="wait">
                 {isSignUp && (
@@ -189,9 +412,8 @@ export default function AuthPage({ go, setUser }) {
                           if (errors.name) setErrors((prev) => ({ ...prev, name: null }));
                         }}
                         placeholder="Sarah Connor"
-                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border outline-none text-xs bg-bg text-text transition-all font-medium ${
-                          errors.name ? "border-rose-500" : "border-border focus:border-cyan-400"
-                        }`}
+                        className={`w-full pl-10 pr-4 py-2.5 rounded-xl border outline-none text-xs bg-bg text-text transition-all font-medium ${errors.name ? "border-rose-500" : "border-border focus:border-cyan-400"
+                          }`}
                       />
                     </div>
                     {errors.name && (
@@ -216,9 +438,8 @@ export default function AuthPage({ go, setUser }) {
                       if (errors.email) setErrors((prev) => ({ ...prev, email: null }));
                     }}
                     placeholder="founder@startup.com"
-                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border outline-none text-xs bg-bg text-text transition-all font-medium ${
-                      errors.email ? "border-rose-500" : "border-border focus:border-cyan-400"
-                    }`}
+                    className={`w-full pl-10 pr-4 py-2.5 rounded-xl border outline-none text-xs bg-bg text-text transition-all font-medium ${errors.email ? "border-rose-500" : "border-border focus:border-cyan-400"
+                      }`}
                   />
                 </div>
                 {errors.email && (
@@ -232,15 +453,6 @@ export default function AuthPage({ go, setUser }) {
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <label className="text-xs font-bold text-text">Password</label>
-                  {!isSignUp && (
-                    <button
-                      type="button"
-                      onClick={() => go("questions")}
-                      className="text-[11px] text-cyan-400 font-bold hover:underline border-none bg-transparent cursor-pointer"
-                    >
-                      Forgot?
-                    </button>
-                  )}
                 </div>
                 <div className="relative">
                   <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-textMuted" />
@@ -252,9 +464,8 @@ export default function AuthPage({ go, setUser }) {
                       if (errors.password) setErrors((prev) => ({ ...prev, password: null }));
                     }}
                     placeholder="••••••••"
-                    className={`w-full pl-10 pr-10 py-2.5 rounded-xl border outline-none text-xs bg-bg text-text transition-all font-medium ${
-                      errors.password ? "border-rose-500" : "border-border focus:border-cyan-400"
-                    }`}
+                    className={`w-full pl-10 pr-10 py-2.5 rounded-xl border outline-none text-xs bg-bg text-text transition-all font-medium ${errors.password ? "border-rose-500" : "border-border focus:border-cyan-400"
+                      }`}
                   />
                   <button
                     type="button"
@@ -294,6 +505,7 @@ export default function AuthPage({ go, setUser }) {
                   onClick={() => {
                     setIsSignUp(!isSignUp);
                     setErrors({});
+                    setServerError("");
                   }}
                   className="text-cyan-400 font-bold hover:underline border-none bg-transparent cursor-pointer"
                 >

@@ -79,9 +79,17 @@ export default function Nav({ go, current, user, setUser }) {
                 onClick={() => go("profile")}
                 className="flex items-center gap-2 border-none bg-transparent cursor-pointer p-0 text-left outline-none hover:opacity-85"
               >
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center text-[10px] font-mono font-bold uppercase">
-                  {user.name.charAt(0)}
-                </div>
+                {user.avatar_url ? (
+                  <img
+                    src={user.avatar_url}
+                    alt={user.name}
+                    className="w-5 h-5 rounded-md object-cover border border-border"
+                  />
+                ) : (
+                  <div className="w-5 h-5 rounded-md bg-gradient-to-br from-primary to-accent text-white flex items-center justify-center text-[10px] font-mono font-bold uppercase">
+                    {user.name ? user.name.charAt(0) : "U"}
+                  </div>
+                )}
                 <span className="text-text max-w-[90px] truncate">{user.name}</span>
               </button>
               <div className="w-[1px] h-3.5 bg-border" />
