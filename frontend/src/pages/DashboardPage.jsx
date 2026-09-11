@@ -403,7 +403,20 @@ export default function DashboardPage({ go, user, setUser }) {
   const hasCustomIdea = Boolean(intakeData && intakeData.idea);
   const safeIntake = hasCustomIdea ? intakeData : DEFAULT_STARTER_CONCEPT;
 
-  const [reports] = useState(() => generateDynamicAgentReports(safeIntake));
+  const [reports, setReports] = useState(() => {
+    if (!safeIntake?.idea) return generateDynamicAgentReports(DEFAULT_STARTER_CONCEPT);
+    const cached = localStorage.getItem(`blueprint_${safeIntake.idea}`);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch (e) {}
+    }
+    return generateDynamicAgentReports(safeIntake);
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState("Connecting to LangGraph multi-agent swarm...");
+  const [backendError, setBackendError] = useState(null);
+  const [isLiveFromBackend, setIsLiveFromBackend] = useState(false);
   const [copiedKey, setCopiedKey] = useState(null);
 
   // Call FastAPI backend to generate blueprint via LangGraph
@@ -558,9 +571,19 @@ export default function DashboardPage({ go, user, setUser }) {
               <span className="font-mono text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
                 {hasCustomIdea ? "ACTIVE CONCEPT ANALYSIS" : "STARTER DEMO CONCEPT"}
               </span>
-              <span className="font-mono text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                100% READY
-              </span>
+              {isLiveFromBackend ? (
+                <span className="font-mono text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  ⚡ LIVE AI BACKEND
+                </span>
+              ) : backendError ? (
+                <span className="font-mono text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20" title={backendError}>
+                  ● PREVIEW (Backend offline)
+                </span>
+              ) : (
+                <span className="font-mono text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                  100% READY
+                </span>
+              )}
             </div>
             <h1 className="font-display text-xl sm:text-2xl font-bold text-text">
               "{safeIntake.idea}"
@@ -571,6 +594,14 @@ export default function DashboardPage({ go, user, setUser }) {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => fetchBlueprintFromBackend(true)}
+              disabled={isLoading}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-surfaceAlt border border-border text-text hover:bg-border transition-all cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw size={14} className={`text-cyan-400 ${isLoading ? "animate-spin" : ""}`} />
+              {isLoading ? "Running Swarm..." : "Re-run AI Agents"}
+            </button>
             <button
               onClick={() => go("questions")}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-surfaceAlt border border-border text-text hover:bg-border transition-all cursor-pointer"
@@ -585,6 +616,33 @@ export default function DashboardPage({ go, user, setUser }) {
             </button>
           </div>
         </div>
+
+        {/* Live LangGraph Multi-Agent Swarm Progress Banner */}
+        {isLoading && (
+          <div className="bento-card p-5 rounded-3xl border border-cyan-500/50 bg-gradient-to-r from-cyan-950/40 via-indigo-950/30 to-purple-950/40 space-y-3 shadow-cyber-cyan animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                  <Cpu className="animate-spin" size={18} />
+                </div>
+                <div>
+                  <h4 className="font-display font-bold text-sm text-cyan-300">
+                    LangGraph Multi-Agent Swarm In Progress
+                  </h4>
+                  <p className="font-mono text-xs text-textMuted">
+                    {loadingStep}
+                  </p>
+                </div>
+              </div>
+              <span className="font-mono text-xs font-bold text-cyan-400 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30">
+                SWARM ACTIVE
+              </span>
+            </div>
+            <div className="w-full bg-surfaceAlt h-1.5 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 h-full w-2/3 animate-[pulse_1s_infinite]" />
+            </div>
+          </div>
+        )}
 
         {/* TAB 1: RESULTS THREAD STREAM */}
         {activeTab === "results" && (
