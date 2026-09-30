@@ -54,7 +54,7 @@ export async function checkStartupStatus(taskId) {
  * @param {number} maxAttempts
  * @returns {Promise<object>}
  */
-export async function pollStartupStatus(taskId, onProgress = () => {}, intervalMs = 2500, maxAttempts = 180) {
+export async function pollStartupStatus(taskId, onProgress = () => {}, intervalMs = 1200, maxAttempts = 180) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const data = await checkStartupStatus(taskId);
     onProgress(data);

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      background: #020617;
+      color: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 30px;
+      display: inline-block;
+      min-width: 1200px;
+    }
+    .card {
+      background: #0A0F24;
+      border: 1px solid #38BDF8;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
+    }
+    h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: #38BDF8;
+      font-family: 'Fira Code', monospace;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>AI STARTUP BUILDER — USE CASE DIAGRAM (UML-03)</h2>
+    <pre class="mermaid">
+flowchart TB
+    %% ACTORS
+    subgraph Actors [" SYSTEM ACTORS & INTERFACES "]
+        direction LR
+        User["👤 Founder / Entrepreneur"]
+        Investor["💼 Investor Stakeholder"]
+        Supervisor["🧠 Supervisor AI Orchestrator"]
+        Gemini["🔮 Google Gemini 3.5 / 3.8 Flash"]
+        DBService[("💾 PostgreSQL / State DB")]
+    end
+
+    %% PHASE 1 & 2
+    subgraph IntakeExecution [" PHASE 1 & 2: INTAKE & REAL-TIME SWARM TELEMETRY "]
+        direction TB
+        subgraph P1 ["Phase 1: Concept Intake"]
+            UC1["(UC-01) Submit Startup Concept & Problem"]
+            UC2["(UC-02) Configure Target Industry & Seed Budget"]
+            UC3["(UC-03) Re-Run Swarm with Custom Seeds"]
+        end
+        subgraph P2 ["Phase 2: Swarm Orchestration & Telemetry"]
+            UC4["(UC-04) Trigger Multi-Agent LangGraph Pipeline"]
+            UC5["(UC-05) Monitor Live Orbit Radar & Traveling Laser"]
+            UC6["(UC-06) Stream Monospace Terminal Execution Logs"]
+            UC7["(UC-07) Chat with Nova AI Companion"]
+        end
+    end
+
+    %% PHASE 3
+    subgraph Synthesis [" PHASE 3: SPECIALIST INTELLIGENCE SYNTHESIS (10 AGENTS) "]
+        direction TB
+        subgraph S_Val ["Validation & Moat"]
+            UC8["(UC-08) Validate Idea & Feasibility Index"]
+            UC9["(UC-09) Calculate TAM, SAM, SOM & CAGR"]
+            UC10["(UC-10) Map Incumbents & Defensive AI Moat"]
+        end
+        subgraph S_Prod ["Product & Business"]
+            UC11["(UC-11) Sculpt Ideal Customer Persona (ICP)"]
+            UC12["(UC-12) Design SaaS Subscription Economics"]
+            UC13["(UC-13) Architect MVP Feature Backlog & Stack"]
+        end
+        subgraph S_Exec ["Execution & Capital"]
+            UC14["(UC-14) Model 3-Year Pro Forma Financials"]
+            UC15["(UC-15) Scan Threat Matrix & Mitigations"]
+            UC16["(UC-16) Formulate Zero-CAC Launch Flywheel"]
+            UC17["(UC-17) Synthesize 10-Slide Investor Deck"]
+        end
+    end
+
+    %% PHASE 4
+    subgraph ReviewExport [" PHASE 4: EXECUTIVE DOSSIER & MULTI-FORMAT EXPORT "]
+        direction TB
+        UC18["(UC-18) Inspect Bento Telemetry Metric Strip"]
+        UC19["(UC-19) Deep-Dive Single Agent Inspector"]
+        UC20["(UC-20) Export Executive PDF (NumberedCanvas)"]
+        UC21["(UC-21) Export Native Word Document (.docx)"]
+        UC22["(UC-22) Export Clean Markdown Dossier (.md)"]
+    end
+
+    %% RELATIONSHIPS
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC5
+    User --> UC6
+    User --> UC7
+    User --> UC18
+    User --> UC19
+    User --> UC20
+    User --> UC21
+    User --> UC22
+
+    Investor --> UC18
+    Investor --> UC19
+    Investor --> UC20
+    Investor --> UC21
+
+    Supervisor --> UC4
+    Supervisor --> UC8
+    Supervisor --> UC9
+    Supervisor --> UC10
+    Supervisor --> UC11
+    Supervisor --> UC12
+    Supervisor --> UC13
+    Supervisor --> UC14
+    Supervisor --> UC15
+    Supervisor --> UC16
+    Supervisor --> UC17
+
+    UC8 -.-> Gemini
+    UC9 -.-> Gemini
+    UC10 -.-> Gemini
+    UC11 -.-> Gemini
+    UC12 -.-> Gemini
+    UC13 -.-> Gemini
+    UC14 -.-> Gemini
+    UC15 -.-> Gemini
+    UC16 -.-> Gemini
+    UC17 -.-> Gemini
+
+    UC4 -.-> DBService
+    UC18 -.-> DBService
+    ReviewExport -.-> DBService
+    </pre>
+  </div>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        darkMode: true,
+        background: '#020617',
+        primaryColor: '#0F172A',
+        primaryTextColor: '#F8FAFC',
+        primaryBorderColor: '#38BDF8',
+        lineColor: '#38BDF8',
+        secondaryColor: '#1E293B',
+        tertiaryColor: '#020617',
+        actorBkg: '#1E293B',
+        actorTextColor: '#38BDF8',
+        actorBorder: '#38BDF8',
+        signalColor: '#38BDF8',
+        signalTextColor: '#F8FAFC',
+        fontFamily: 'ui-monospace, monospace'
+      }
+    });
+  </script>
+</body>
+</html>

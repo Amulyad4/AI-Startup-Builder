@@ -28,7 +28,7 @@ export default function ProfilePage({ go, user, setUser }) {
     const scores = recentActivities
       .map(a => parseFloat(a.feasibility))
       .filter(n => !isNaN(n));
-    if (scores.length === 0) return "9.4 / 10";
+    if (scores.length === 0) return "N/A";
     const sum = scores.reduce((a, b) => a + b, 0);
     return (sum / scores.length).toFixed(1) + " / 10";
   }, [recentActivities]);

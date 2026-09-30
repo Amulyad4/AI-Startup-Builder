@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      background: #020617;
+      color: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 30px;
+      display: inline-block;
+      min-width: 1200px;
+    }
+    .card {
+      background: #0A0F24;
+      border: 1px solid #38BDF8;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
+    }
+    h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: #38BDF8;
+      font-family: 'Fira Code', monospace;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>AI STARTUP BUILDER — SEQUENCE DIAGRAM (UML-02)</h2>
+    <div class="mermaid">
+      sequenceDiagram
+    autonumber
+    actor Founder as 👤 Founder
+    participant UI as 🖥️ Dashboard UI
+    participant API as ⚡ FastAPI Backend
+    participant TaskDB as 🗄️ Task Registry
+    participant Swarm as 🤖 LangGraph Swarm
+    participant LLM as 🔮 RobustLLM (Gemini)
+    participant DB as 💾 Database
+    participant Export as 📄 Export Engine
+
+    Founder->>UI: Enter Idea & Click "Run Swarm"
+    activate UI
+    UI->>API: POST /generate-startup { startup_idea }
+    activate API
+    API->>TaskDB: Create Task (status="processing", progress=5%)
+    API->>API: Spawn background stream worker
+    API-->>UI: 200 OK { task_id, status: "processing" }
+    deactivate API
+
+    loop Every 1.2s Poll Loop
+        UI->>API: GET /startup-status/{task_id}
+        API->>TaskDB: Fetch latest state
+        TaskDB-->>API: { current_agent, completed_agents, progress_percent }
+        API-->>UI: Live Telemetry Payload
+        UI->>UI: Animate Orbit Radar & Dynamic Laser Beam
+    end
+
+    critical 10-Agent Swarm Orchestration
+        Swarm->>LLM: 1. Idea Validation (Problem & Feasibility)
+        LLM-->>Swarm: IdeaValidationOutput (Score: 82/100)
+        Swarm->>TaskDB: completed=["ideaValidation"], pct=10%
+
+        Swarm->>LLM: 2. Market Research (TAM/SAM/SOM Sizing)
+        LLM-->>Swarm: MarketResearchOutput (.8B TAM)
+        Swarm->>TaskDB: completed+=[marketResearch], pct=20%
+
+        Swarm->>LLM: 3. Competitor Analysis (Incumbents & Moats)
+        LLM-->>Swarm: CompetitorAnalysisOutput (Defensive Moat)
+        Swarm->>TaskDB: completed+=[competitorAnalysis], pct=30%
+
+        Swarm->>LLM: 4. Customer Persona (ICP Profiling)
+        LLM-->>Swarm: CustomerPersonaOutput (Primary ICP)
+        Swarm->>TaskDB: completed+=[customerPersona], pct=40%
+
+        Swarm->>LLM: 5. Business Model (Pricing & SaaS Tiers)
+        LLM-->>Swarm: BusinessModelOutput (Tiered Plans)
+        Swarm->>TaskDB: completed+=[businessModel], pct=50%
+
+        Swarm->>LLM: 6. MVP Planning (Sprint Backlog & Stack)
+        LLM-->>Swarm: MVPPlanningOutput (Architecture)
+        Swarm->>TaskDB: completed+=[mvpPlanning], pct=60%
+
+        Swarm->>LLM: 7. Financial Planning (ARR & ROI)
+        LLM-->>Swarm: FinancialPlanningOutput (Break-even: Month 14)
+        Swarm->>TaskDB: completed+=[financialPlanning], pct=70%
+
+        Swarm->>LLM: 8. Risk Assessment (Threat Matrix)
+        LLM-->>Swarm: RiskAssessmentOutput (Mitigation Matrix)
+        Swarm->>TaskDB: completed+=[riskAssessment], pct=80%
+
+        Swarm->>LLM: 9. Marketing Strategy (Zero-CAC Flywheel)
+        LLM-->>Swarm: MarketingStrategyOutput (Launch Blitz)
+        Swarm->>TaskDB: completed+=[marketingStrategy], pct=90%
+
+        Swarm->>LLM: 10. Pitch Deck (10-Slide Seed Narrative)
+        LLM-->>Swarm: PitchDeckOutput (Investor Deck)
+        Swarm->>TaskDB: completed+=[pitchDeck], pct=100%
+    end
+
+    Swarm->>DB: Persist StartupBlueprint record
+    Swarm->>TaskDB: status="completed", result=payload
+
+    UI->>API: GET /startup-status/{task_id}
+    API-->>UI: Full 10-Agent Blueprint Payload
+    UI->>UI: Render Results Dossier & Nova Badge
+    deactivate UI
+
+    Founder->>UI: Click "Export Blueprint" (PDF)
+    UI->>API: POST /export-blueprint-pdf { blueprint }
+    activate API
+    API->>Export: Compile ReportLab NumberedCanvas Document
+    Export-->>API: Binary PDF Stream
+    API-->>UI: 200 OK (Content-Disposition: attachment)
+    deactivate API
+    UI-->>Founder: Instant File Download
+    </div>
+  </div>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        darkMode: true,
+        background: '#020617',
+        primaryColor: '#0F172A',
+        primaryTextColor: '#F8FAFC',
+        primaryBorderColor: '#38BDF8',
+        lineColor: '#38BDF8',
+        secondaryColor: '#1E293B',
+        tertiaryColor: '#020617',
+        actorBkg: '#1E293B',
+        actorTextColor: '#38BDF8',
+        actorBorder: '#38BDF8',
+        signalColor: '#38BDF8',
+        signalTextColor: '#F8FAFC',
+        fontFamily: 'ui-monospace, monospace'
+      }
+    });
+  </script>
+</body>
+</html>

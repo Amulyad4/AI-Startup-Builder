@@ -147,3 +147,36 @@ body {
   background: var(--border-contrast);
   border-radius: 8px;
 }
+
+/* Swarm Laser Beam Traveling Dash Animation */
+@keyframes swarmLaserDash {
+  from {
+    stroke-dashoffset: 20;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.swarm-laser-beam {
+  animation: swarmLaserDash 0.85s linear infinite;
+}
+
+@keyframes sonarPing {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.animate-sonar {
+  animation: sonarPing 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}

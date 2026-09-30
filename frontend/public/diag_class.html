@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      background: #020617;
+      color: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 30px;
+      display: inline-block;
+      min-width: 1200px;
+    }
+    .card {
+      background: #0A0F24;
+      border: 1px solid #38BDF8;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.2);
+    }
+    h2 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      color: #38BDF8;
+      font-family: 'Fira Code', monospace;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>AI STARTUP BUILDER — CLASS DIAGRAM (UML-01)</h2>
+    <div class="mermaid">
+      classDiagram
+    direction TB
+    class StartupState {
+        +string startup_idea
+        +IdeaValidationOutput validation
+        +MarketResearchOutput market
+        +CompetitorAnalysisOutput competitors
+        +CustomerPersonaOutput persona
+        +BusinessModelOutput business_model
+        +MVPPlanningOutput mvp
+        +FinancialPlanningOutput financial
+        +RiskAssessmentOutput risk
+        +MarketingStrategyOutput marketing
+        +PitchDeckOutput pitch
+        +dict final_output
+    }
+    class IdeaValidationOutput {
+        +string problem
+        +string solution
+        +int feasibility_score
+        +int innovation_score
+        +list strengths
+        +list weaknesses
+    }
+    class MarketResearchOutput {
+        +string market_size
+        +string target_audience
+        +list trends
+        +list opportunities
+    }
+    class CompetitorAnalysisOutput {
+        +list competitors
+        +string competitive_advantage
+        +list market_gaps
+    }
+    class CustomerPersonaOutput {
+        +string target_customer
+        +string demographics
+        +list pain_points
+        +string buying_behavior
+    }
+    class BusinessModelOutput {
+        +string revenue_model
+        +string pricing_strategy
+        +string cost_structure
+        +list channels
+    }
+    class MVPPlanningOutput {
+        +list core_features
+        +list development_phases
+        +string estimated_timeline
+        +list tech_stack
+    }
+    class FinancialPlanningOutput {
+        +string estimated_cost
+        +string monthly_expense
+        +string expected_revenue
+        +string break_even
+        +string roi
+    }
+    class RiskAssessmentOutput {
+        +string technical_risk
+        +string market_risk
+        +string financial_risk
+        +list mitigation
+    }
+    class MarketingStrategyOutput {
+        +string branding
+        +list marketing_channels
+        +string launch_plan
+        +string customer_acquisition
+    }
+    class PitchDeckOutput {
+        +string title
+        +string problem
+        +string solution
+        +string market
+        +string business_model
+        +string financials
+        +string ask
+    }
+    class RobustLLM {
+        +list models
+        +string api_key
+        +with_structured_output(schema)
+        +invoke(prompt)
+    }
+    class GeminiService {
+        +generate_flash_3_5()
+        +generate_flash_3_8()
+        +fallback_circuit_breaker()
+    }
+    class StateGraphApp {
+        +compile()
+        +stream(initial_state)
+    }
+    class FastAPIRouter {
+        +generate_startup(StartupRequest)
+        +get_startup_status(task_id)
+        +export_blueprint_pdf(request)
+        +export_blueprint_docx(request)
+    }
+    class StartupBlueprintModel {
+        +int id
+        +string idea
+        +json validation
+        +json market
+        +json competitors
+        +json persona
+        +json business_model
+        +json mvp
+        +json financial
+        +json risk
+        +json marketing
+        +json pitch
+        +datetime created_at
+    }
+    StartupState *-- IdeaValidationOutput
+    StartupState *-- MarketResearchOutput
+    StartupState *-- CompetitorAnalysisOutput
+    StartupState *-- CustomerPersonaOutput
+    StartupState *-- BusinessModelOutput
+    StartupState *-- MVPPlanningOutput
+    StartupState *-- FinancialPlanningOutput
+    StartupState *-- RiskAssessmentOutput
+    StartupState *-- MarketingStrategyOutput
+    StartupState *-- PitchDeckOutput
+    StateGraphApp ..> StartupState : transforms
+    StateGraphApp ..> RobustLLM : queries
+    RobustLLM ..> GeminiService : executes
+    FastAPIRouter ..> StateGraphApp : triggers stream
+    FastAPIRouter ..> StartupBlueprintModel : persists
+    </div>
+  </div>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        darkMode: true,
+        background: '#020617',
+        primaryColor: '#0F172A',
+        primaryTextColor: '#F8FAFC',
+        primaryBorderColor: '#38BDF8',
+        lineColor: '#38BDF8',
+        secondaryColor: '#1E293B',
+        tertiaryColor: '#020617',
+        actorBkg: '#1E293B',
+        actorTextColor: '#38BDF8',
+        actorBorder: '#38BDF8',
+        signalColor: '#38BDF8',
+        signalTextColor: '#F8FAFC',
+        fontFamily: 'ui-monospace, monospace'
+      }
+    });
+  </script>
+</body>
+</html>

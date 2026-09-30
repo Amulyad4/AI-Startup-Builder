@@ -9,11 +9,17 @@ export const AGENTS = Object.keys(AGENT_META)
     return {
       key: meta.id,
       name: meta.label,
+      label: meta.label,
       tag: meta.tag,
       icon: meta.icon,
       colorLight: meta.colorLight,
       colorDark: meta.colorDark,
       rgb: meta.rgb,
-      desc: meta.desc
+      desc: meta.desc,
+      avatarType: meta.avatarType,
+      emoji: meta.emoji,
+      category: meta.category,
+      catchphrase: meta.catchphrase,
     };
   });
+

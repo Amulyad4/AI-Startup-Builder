@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { 
-  LayoutDashboard, Rocket, Sliders, MessageSquare, BarChart3, 
-  Terminal, Cpu, History, User, Settings, LogOut, Menu, X, 
+import {
+  LayoutDashboard, Rocket, Sliders, MessageSquare, BarChart3,
+  Terminal, Cpu, History, User, Settings, LogOut, Menu, X,
   Sparkles, Download
 } from "lucide-react";
 import Logo from "./Logo";
@@ -29,7 +29,7 @@ export default function WorkspaceLayout({
     try {
       const saved = localStorage.getItem("selected_agent_keys");
       if (saved) return JSON.parse(saved);
-    } catch (e) {}
+    } catch (e) { }
     return AGENTS.map((a) => a.key);
   }, []);
 
@@ -46,43 +46,52 @@ export default function WorkspaceLayout({
     {
       group: "INTELLIGENCE & REPORTS",
       items: [
-        { 
-          id: "results", 
-          label: "Results Thread", 
-          icon: MessageSquare, 
+        {
+          id: "results",
+          label: "Results Thread",
+          icon: MessageSquare,
           action: () => {
             if (setActiveTab) setActiveTab("results");
             go("results");
           }
         },
-        { 
-          id: "analytics", 
-          label: "Analytics & Graphs", 
-          icon: BarChart3, 
+        {
+          id: "analytics",
+          label: "Analytics & Graphs",
+          icon: BarChart3,
           action: () => {
             if (setActiveTab) setActiveTab("analytics");
             go("dashboard");
           }
         },
-        { 
-          id: "console", 
-          label: "Terminal Console", 
-          icon: Terminal, 
+        {
+          id: "console",
+          label: "Terminal Console",
+          icon: Terminal,
           action: () => {
             if (setActiveTab) setActiveTab("console");
             go("dashboard");
           }
         },
-        { 
-          id: "matrix", 
-          label: "Swarm Efficiency", 
-          icon: Cpu, 
+        {
+          id: "matrix",
+          label: "Swarm Efficiency",
+          icon: Cpu,
           action: () => {
             if (setActiveTab) setActiveTab("matrix");
             go("dashboard");
           }
+        },
+        {
+          id: "uml",
+          label: "UML Architecture",
+          icon: Sliders,
+          action: () => {
+            window.open("/diagrams.html", "_blank");
+          }
         }
       ]
+
     },
     {
       group: "MANAGEMENT",
@@ -115,7 +124,7 @@ export default function WorkspaceLayout({
 
   return (
     <div className="min-h-screen bg-transparent text-text font-body flex flex-col relative overflow-x-hidden">
-      
+
       {/* Background Dot Overlay */}
       <div className="absolute inset-0 bg-dot-texture opacity-15 pointer-events-none z-0" />
 
@@ -131,16 +140,16 @@ export default function WorkspaceLayout({
             {mobileSidebarOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
 
-          <button 
-            onClick={() => go("dashboard")} 
+          <button
+            onClick={() => go("dashboard")}
             className="cursor-pointer border-none bg-transparent outline-none flex items-center"
             title="Go to Dashboard"
           >
             <Logo />
           </button>
-          
+
           <div className="h-4 w-[1px] bg-border hidden sm:block" />
-          
+
           <span className="font-mono text-xs text-textMuted hidden lg:flex items-center gap-1.5 font-bold uppercase tracking-wider">
             <Sparkles size={14} className="text-cyan-400" /> {title}
           </span>
@@ -224,11 +233,11 @@ export default function WorkspaceLayout({
 
       {/* Main Workspace Body with Persistent Sidebar */}
       <div className="flex-1 flex overflow-hidden relative z-10">
-        
+
         {/* Backdrop for mobile drawer */}
         {mobileSidebarOpen && (
-          <div 
-            onClick={() => setMobileSidebarOpen(false)} 
+          <div
+            onClick={() => setMobileSidebarOpen(false)}
             className="fixed inset-0 bg-black/60 backdrop-blur-xs z-30 md:hidden"
           />
         )}
@@ -258,11 +267,10 @@ export default function WorkspaceLayout({
                     <button
                       key={item.id}
                       onClick={() => handleNavClick(item)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border text-left outline-none ${
-                        active
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border text-left outline-none ${active
                           ? "bg-cyan-500/15 text-cyan-400 border-cyan-500/30 shadow-xs"
                           : "text-textMuted border-transparent hover:text-text hover:bg-surfaceAlt"
-                      }`}
+                        }`}
                     >
                       <ItemIcon size={16} />
                       <span className="flex-1">{item.label}</span>

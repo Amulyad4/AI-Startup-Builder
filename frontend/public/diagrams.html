@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Startup Builder — Professional UML Architecture Diagrams</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #040714;
+      --card-bg: #0A0F24;
+      --border: #1E293B;
+      --border-accent: #38BDF8;
+      --cyan: #38BDF8;
+      --indigo: #818CF8;
+      --emerald: #34D399;
+      --amber: #FBBF24;
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 32px 24px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.12) 0%, transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(129, 140, 248, 0.08) 0%, transparent 50%);
+    }
+
+    header {
+      max-width: 1400px;
+      margin: 0 auto 32px auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(56,189,248,0.2), rgba(129,140,248,0.2));
+      border: 1px solid rgba(56,189,248,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 16px rgba(56,189,248,0.3);
+    }
+
+    .brand-title h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #FFFFFF, #93C5FD);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-title p {
+      font-size: 13px;
+      color: var(--cyan);
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 6px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(56,189,248,0.25), rgba(99,102,241,0.25));
+      color: var(--cyan);
+      border: 1px solid rgba(56,189,248,0.4);
+      box-shadow: 0 0 12px rgba(56,189,248,0.2);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .diagram-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .diagram-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .diagram-header h2 {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .diagram-header .tag {
+      font-family: 'Fira Code', monospace;
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--cyan);
+    }
+
+    .diagram-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+      max-width: 900px;
+    }
+
+    .mermaid-wrapper {
+      background: #020617;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .mermaid {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 14px;
+      font-size: 12px;
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 10px rgba(56,189,248,0.25);
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-badge">⚡</div>
+      <div class="brand-title">
+        <h1>AI Startup Builder — UML Architecture</h1>
+        <p>THEME: CYBER MIDNIGHT NEON · COMPLETE DOMAIN COVERAGE</p>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('class')">📦 Class Diagram</button>
+      <button class="tab-btn" onclick="switchTab('sequence')">⏱️ Sequence Diagram</button>
+      <button class="tab-btn" onclick="switchTab('usecase')">🎯 Use Case Diagram</button>
+      <button class="tab-btn" onclick="switchTab('all')">👁️ View All</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- 1. CLASS DIAGRAM SECTION -->
+    <section id="section-class" class="diagram-card">
+      <div class="diagram-header">
+        <div>
+          <h2>📦 Complete System Class Diagram <span class="tag">UML-CLASS-01</span></h2>
+        </div>
+        <div class="actions">
+          <button class="action-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+        </div>
+      </div>
+      <p class="diagram-desc">
+        Maps the unified object-oriented and structural state architecture: The typed <strong>StartupState</strong> container, all 10 specialized <strong>Pydantic output models</strong>, the <strong>RobustLLM</strong> Gemini circuit-breaker wrapper, the <strong>FastAPI / SQLAlchemy</strong> backend, and <strong>React</strong> telemetry controllers.
+      </p>
+      <div class="mermaid-wrapper">
+        <pre class="mermaid">
+classDiagram
+    direction TB
+
+    class StartupState {
+        +string startup_idea
+        +IdeaValidationOutput validation
+        +MarketResearchOutput market
+        +CompetitorAnalysisOutput competitors
+        +CustomerPersonaOutput persona
+        +BusinessModelOutput business_model
+        +MVPPlanningOutput mvp
+        +FinancialPlanningOutput financial
+        +RiskAssessmentOutput risk
+        +MarketingStrategyOutput marketing
+        +PitchDeckOutput pitch
+        +dict final_output
+    }
+
+    class IdeaValidationOutput {
+        +string problem
+        +string solution
+        +int feasibility_score
+        +int innovation_score
+        +list strengths
+        +list weaknesses
+        +list suggestions
+    }
+
+    class MarketResearchOutput {
+        +string market_size
+        +string target_audience
+        +list trends
+        +list opportunities
+        +list threats
+    }
+
+    class CompetitorAnalysisOutput {
+        +list competitors
+        +string competitive_advantage
+        +list market_gaps
+    }
+
+    class CustomerPersonaOutput {
+        +string target_customer
+        +string demographics
+        +list pain_points
+        +list goals
+        +string buying_behavior
+    }
+
+    class BusinessModelOutput {
+        +string revenue_model
+        +string pricing_strategy
+        +string cost_structure
+        +list channels
+        +list key_partnerships
+    }
+
+    class MVPPlanningOutput {
+        +list core_features
+        +list development_phases
+        +string estimated_timeline
+        +list tech_stack
+    }
+
+    class FinancialPlanningOutput {
+        +string estimated_cost
+        +string monthly_expense
+        +string expected_revenue
+        +string break_even
+        +string roi
+    }
+
+    class RiskAssessmentOutput {
+        +string technical_risk
+        +string market_risk
+        +string financial_risk
+        +string legal_risk
+        +list mitigation
+    }
+
+    class MarketingStrategyOutput {
+        +string branding
+        +list marketing_channels
+        +string launch_plan
+        +string customer_acquisition
+        +string growth_strategy
+    }
+
+    class PitchDeckOutput {
+        +string title
+        +string problem
+        +string solution
+        +string market
+        +string competition
+        +string business_model
+        +string financials
+        +string ask
+        +string roadmap
+    }
+
+    class RobustLLM {
+        +list models
+        +string api_key
+        +with_structured_output(schema)
+        +invoke(prompt)
+    }
+
+    class GeminiService {
+        +generate_flash_3_5()
+        +generate_flash_3_8()
+        +fallback_circuit_breaker()
+    }
+
+    class StateGraphApp {
+        +compile()
+        +stream(initial_state)
+    }
+
+    class FastAPIRouter {
+        +generate_startup(StartupRequest)
+        +get_startup_status(task_id)
+        +export_blueprint_pdf(request)
+        +export_blueprint_docx(request)
+    }
+
+    class StartupBlueprintModel {
+        +int id
+        +string idea
+        +json validation
+        +json market
+        +json competitors
+        +json persona
+        +json business_model
+        +json mvp
+        +json financial
+        +json risk
+        +json marketing
+        +json pitch
+        +datetime created_at
+    }
+
+    StartupState *-- IdeaValidationOutput
+    StartupState *-- MarketResearchOutput
+    StartupState *-- CompetitorAnalysisOutput
+    StartupState *-- CustomerPersonaOutput
+    StartupState *-- BusinessModelOutput
+    StartupState *-- MVPPlanningOutput
+    StartupState *-- FinancialPlanningOutput
+    StartupState *-- RiskAssessmentOutput
+    StartupState *-- MarketingStrategyOutput
+    StartupState *-- PitchDeckOutput
+
+    StateGraphApp ..> StartupState : transforms
+    StateGraphApp ..> RobustLLM : queries
+    RobustLLM ..> GeminiService : executes
+
+    FastAPIRouter ..> StateGraphApp : triggers stream
+    FastAPIRouter ..> StartupBlueprintModel : persists
+
+        </pre>
+      </div>
+    </section>
+
+    <!-- 2. SEQUENCE DIAGRAM SECTION -->
+    <section id="section-sequence" class="diagram-card">
+      <div class="diagram-header">
+        <div>
+          <h2>⏱️ End-to-End Execution Sequence Diagram <span class="tag">UML-SEQ-02</span></h2>
+        </div>
+        <div class="actions">
+          <button class="action-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+        </div>
+      </div>
+      <p class="diagram-desc">
+        Illustrates the complete asynchronous request lifecycle: Idea intake via React UI, background task streaming in FastAPI, sequential invocation of all 10 specialized agent nodes via Gemini, live radar polling updates, database storage, and ReportLab PDF/Word export.
+      </p>
+      <div class="mermaid-wrapper">
+        <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Founder as 👤 Founder
+    participant UI as 🖥️ Dashboard UI
+    participant API as ⚡ FastAPI Backend
+    participant TaskDB as 🗄️ Task Registry
+    participant Swarm as 🤖 LangGraph Swarm
+    participant LLM as 🔮 RobustLLM (Gemini)
+    participant DB as 💾 Database
+    participant Export as 📄 Export Engine
+
+    Founder->>UI: Enter Idea & Click "Run Swarm"
+    activate UI
+    UI->>API: POST /generate-startup { startup_idea }
+    activate API
+    API->>TaskDB: Create Task (status="processing", progress=5%)
+    API->>API: Spawn background stream worker
+    API-->>UI: 200 OK { task_id, status: "processing" }
+    deactivate API
+
+    loop Every 1.2s Poll Loop
+        UI->>API: GET /startup-status/{task_id}
+        API->>TaskDB: Fetch latest state
+        TaskDB-->>API: { current_agent, completed_agents, progress_percent }
+        API-->>UI: Live Telemetry Payload
+        UI->>UI: Animate Orbit Radar & Dynamic Laser Beam
+    end
+
+    critical 10-Agent Swarm Orchestration
+        Swarm->>LLM: 1. Idea Validation (Problem & Feasibility)
+        LLM-->>Swarm: IdeaValidationOutput (Score: 82/100)
+        Swarm->>TaskDB: completed=["ideaValidation"], pct=10%
+
+        Swarm->>LLM: 2. Market Research (TAM/SAM/SOM Sizing)
+        LLM-->>Swarm: MarketResearchOutput ($4.8B TAM)
+        Swarm->>TaskDB: completed+=[marketResearch], pct=20%
+
+        Swarm->>LLM: 3. Competitor Analysis (Incumbents & Moats)
+        LLM-->>Swarm: CompetitorAnalysisOutput (Defensive Moat)
+        Swarm->>TaskDB: completed+=[competitorAnalysis], pct=30%
+
+        Swarm->>LLM: 4. Customer Persona (ICP Profiling)
+        LLM-->>Swarm: CustomerPersonaOutput (Primary ICP)
+        Swarm->>TaskDB: completed+=[customerPersona], pct=40%
+
+        Swarm->>LLM: 5. Business Model (Pricing & SaaS Tiers)
+        LLM-->>Swarm: BusinessModelOutput (Tiered Plans)
+        Swarm->>TaskDB: completed+=[businessModel], pct=50%
+
+        Swarm->>LLM: 6. MVP Planning (Sprint Backlog & Stack)
+        LLM-->>Swarm: MVPPlanningOutput (Architecture)
+        Swarm->>TaskDB: completed+=[mvpPlanning], pct=60%
+
+        Swarm->>LLM: 7. Financial Planning (ARR & ROI)
+        LLM-->>Swarm: FinancialPlanningOutput (Break-even: Month 14)
+        Swarm->>TaskDB: completed+=[financialPlanning], pct=70%
+
+        Swarm->>LLM: 8. Risk Assessment (Threat Matrix)
+        LLM-->>Swarm: RiskAssessmentOutput (Mitigation Matrix)
+        Swarm->>TaskDB: completed+=[riskAssessment], pct=80%
+
+        Swarm->>LLM: 9. Marketing Strategy (Zero-CAC Flywheel)
+        LLM-->>Swarm: MarketingStrategyOutput (Launch Blitz)
+        Swarm->>TaskDB: completed+=[marketingStrategy], pct=90%
+
+        Swarm->>LLM: 10. Pitch Deck (10-Slide Seed Narrative)
+        LLM-->>Swarm: PitchDeckOutput (Investor Deck)
+        Swarm->>TaskDB: completed+=[pitchDeck], pct=100%
+    end
+
+    Swarm->>DB: Persist StartupBlueprint record
+    Swarm->>TaskDB: status="completed", result=payload
+
+    UI->>API: GET /startup-status/{task_id}
+    API-->>UI: Full 10-Agent Blueprint Payload
+    UI->>UI: Render Results Dossier & Nova Badge
+    deactivate UI
+
+    Founder->>UI: Click "Export Blueprint" (PDF)
+    UI->>API: POST /export-blueprint-pdf { blueprint }
+    activate API
+    API->>Export: Compile ReportLab NumberedCanvas Document
+    Export-->>API: Binary PDF Stream
+    API-->>UI: 200 OK (Content-Disposition: attachment)
+    deactivate API
+    UI-->>Founder: Instant File Download
+        </pre>
+      </div>
+    </section>
+
+    <!-- 3. USE CASE DIAGRAM SECTION -->
+    <section id="section-usecase" class="diagram-card">
+      <div class="diagram-header">
+        <div>
+          <h2>🎯 Comprehensive Use Case Diagram <span class="tag">UML-UC-03</span></h2>
+        </div>
+        <div class="actions">
+          <button class="action-btn" onclick="window.print()">🖨️ Print / Save PDF</button>
+        </div>
+      </div>
+      <p class="diagram-desc">
+        Depicts all functional use cases categorized into 4 core phases: Concept Intake, Swarm Execution & Telemetry, Domain Intelligence Synthesis across all 10 specialist agents, and Executive Review with multi-format institutional exports.
+      </p>
+      <div class="mermaid-wrapper">
+        <pre class="mermaid">
+graph TD
+    User(("👤 Founder / Entrepreneur"))
+    Investor(("💼 Investor / Stakeholder"))
+    Supervisor(("🧠 Supervisor AI Core"))
+    Gemini(("🔮 Google Gemini API"))
+    DBService[("💾 Database / Storage")]
+
+    subgraph UC_Intake ["Phase 1: Concept Intake"]
+        UC1["UC-01: Enter Startup Concept & Problem"]
+        UC2["UC-02: Select Industry & Capital Budget"]
+        UC3["UC-03: Re-Run Swarm with New Seeds"]
+    end
+
+    subgraph UC_Swarm ["Phase 2: Swarm Execution & Telemetry"]
+        UC4["UC-04: Stream Multi-Agent Execution Graph"]
+        UC5["UC-05: Inspect Live Orbit Radar & Laser Beam"]
+        UC6["UC-06: Monitor Real-Time Stream Terminal Logs"]
+        UC7["UC-07: Query Nova Interactive Companion"]
+    end
+
+    subgraph UC_Agents ["Phase 3: Domain Intelligence Synthesis"]
+        UC8["UC-08: Validate Concept & Feasibility Score"]
+        UC9["UC-09: Size TAM, SAM, SOM & Growth CAGR"]
+        UC10["UC-10: Map Incumbents & Defensive AI Moat"]
+        UC11["UC-11: Sculpt ICP Persona & Pain Triggers"]
+        UC12["UC-12: Formulate Unit Economics & SaaS Tiers"]
+        UC13["UC-13: Architect MVP Feature Backlog & Stack"]
+        UC14["UC-14: Model 3-Year Pro Forma Financials"]
+        UC15["UC-15: Scan Risk Matrix & Mitigations"]
+        UC16["UC-16: Prime Zero-CAC Launch Flywheel"]
+        UC17["UC-17: Synthesize 10-Slide Pitch Deck"]
+    end
+
+    subgraph UC_Export ["Phase 4: Executive Review & Export"]
+        UC18["UC-18: Review Bento Telemetry Metric Strip"]
+        UC19["UC-19: Deep-Dive Single Agent Inspection"]
+        UC20["UC-20: Export Executive PDF (NumberedCanvas)"]
+        UC21["UC-21: Export Word Document (.docx)"]
+        UC22["UC-22: Export Clean Markdown Dossier (.md)"]
+    end
+
+    User --> UC1
+    User --> UC2
+    User --> UC3
+    User --> UC5
+    User --> UC6
+    User --> UC7
+    User --> UC18
+    User --> UC19
+    User --> UC20
+    User --> UC21
+    User --> UC22
+
+    Investor --> UC18
+    Investor --> UC19
+    Investor --> UC20
+    Investor --> UC21
+
+    Supervisor --> UC4
+    Supervisor --> UC8
+    Supervisor --> UC9
+    Supervisor --> UC10
+    Supervisor --> UC11
+    Supervisor --> UC12
+    Supervisor --> UC13
+    Supervisor --> UC14
+    Supervisor --> UC15
+    Supervisor --> UC16
+    Supervisor --> UC17
+
+    UC8 -.-> Gemini
+    UC9 -.-> Gemini
+    UC10 -.-> Gemini
+    UC11 -.-> Gemini
+    UC12 -.-> Gemini
+    UC13 -.-> Gemini
+    UC14 -.-> Gemini
+    UC15 -.-> Gemini
+    UC16 -.-> Gemini
+    UC17 -.-> Gemini
+
+    UC4 -.-> DBService
+    UC18 -.-> DBService
+        </pre>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'base',
+      themeVariables: {
+        darkMode: true,
+        background: '#020617',
+        primaryColor: '#0F172A',
+        primaryTextColor: '#F8FAFC',
+        primaryBorderColor: '#38BDF8',
+        lineColor: '#38BDF8',
+        secondaryColor: '#1E293B',
+        tertiaryColor: '#020617',
+        actorBkg: '#1E293B',
+        actorTextColor: '#38BDF8',
+        actorBorder: '#38BDF8',
+        signalColor: '#38BDF8',
+        signalTextColor: '#F8FAFC',
+        fontFamily: 'ui-monospace, monospace'
+      }
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      const secClass = document.getElementById('section-class');
+      const secSeq = document.getElementById('section-sequence');
+      const secUc = document.getElementById('section-usecase');
+
+      if (tabId === 'class') {
+        event.target.classList.add('active');
+        secClass.classList.remove('hidden');
+        secSeq.classList.add('hidden');
+        secUc.classList.add('hidden');
+      } else if (tabId === 'sequence') {
+        event.target.classList.add('active');
+        secClass.classList.add('hidden');
+        secSeq.classList.remove('hidden');
+        secUc.classList.add('hidden');
+      } else if (tabId === 'usecase') {
+        event.target.classList.add('active');
+        secClass.classList.add('hidden');
+        secSeq.classList.add('hidden');
+        secUc.classList.remove('hidden');
+      } else {
+        event.target.classList.add('active');
+        secClass.classList.remove('hidden');
+        secSeq.classList.remove('hidden');
+        secUc.classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

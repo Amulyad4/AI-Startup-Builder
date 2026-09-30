@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Compass, Cpu, Target, ShieldCheck, Zap, Layers, BarChart3, CheckCircle2, Bot, Terminal, Award, Users, TrendingUp } from "lucide-react";
 import Footer from "../components/Footer";
 import { AGENTS, getAgentColor } from "../constants";
+import { ALL_11_AGENTS } from "../constants/agents";
+import AgentAvatar from "../components/AgentAvatar";
 import { useTheme } from "../context/ThemeContext";
 import Reveal, { Stagger, StaggerItem } from "../components/motion/Reveal";
 import MagneticButton from "../components/motion/MagneticButton";
@@ -188,58 +190,56 @@ export default function LandingPage({ go, user }) {
         </Stagger>
       </section>
 
-      {/* ACTIVE 10-AGENT ROSTER BENTO GRID */}
-      <section className="max-w-7xl mx-auto px-6 pb-28 relative z-10 w-full">
-        <Reveal className="flex items-center gap-3 mb-10">
-          <span className="font-mono text-xs tracking-widest text-cyan-400 font-bold uppercase">10 SPECIALIST AGENT MODULES</span>
-          <div className="h-[1px] flex-1 bg-border" />
-        </Reveal>
+      {/* 11 SPECIALIST AGENTS ROSTER - ELEVEN MINDS. ONE VISION */}
+      <section className="max-w-7xl mx-auto px-6 pb-28 relative z-10 w-full text-left">
+        <div className="mb-10 space-y-2">
+          <h2 className="font-syne text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-text">
+            Eleven minds. One vision.
+          </h2>
+          <p className="text-sm sm:text-base text-textMuted max-w-2xl leading-relaxed">
+            Each specialist has its own personality, animation, and reasoning style.
+          </p>
+        </div>
         
-        <Stagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" stagger={0.05}>
-          {AGENTS.map((agent) => {
-            const Icon = agent.icon;
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {ALL_11_AGENTS.map((agent) => {
             const agentColor = getAgentColor(agent.key, dark);
-
             return (
-              <StaggerItem
+              <motion.div
                 key={agent.key}
-                whileHover={{ y: -6, scale: 1.03 }}
-                transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                className="bento-card p-5 rounded-3xl border bg-surface flex flex-col justify-between text-left group"
-                style={{
-                  borderTop: `3px solid ${agentColor}`
-                }}
+                whileHover={{ y: -4, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 350, damping: 22 }}
+                onClick={() => go(user ? "dashboard" : "questions")}
+                className="p-5 rounded-2xl border border-border/80 bg-surface/90 backdrop-blur-md flex items-center gap-4.5 transition-all hover:border-cyan-500/50 shadow-sm hover:shadow-cyber-cyan cursor-pointer group"
               >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-xs"
-                      style={{
-                        backgroundColor: `${agentColor}18`,
-                        color: agentColor
-                      }}
-                    >
-                      <Icon size={18} />
-                    </div>
-                    <span className="font-mono text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      ● READY
-                    </span>
-                  </div>
+                {/* 3D Character Avatar Illustration */}
+                <div
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 relative p-1"
+                  style={{
+                    backgroundColor: `${agentColor}14`,
+                    boxShadow: `inset 0 0 12px ${agentColor}25`,
+                  }}
+                >
+                  <AgentAvatar type={agent.avatarType} size={50} />
+                </div>
 
-                  <span className="font-mono text-[10px] font-bold block mb-1" style={{ color: agentColor }}>
-                    {agent.tag}
+                {/* Info Text */}
+                <div className="space-y-1 min-w-0 flex-1">
+                  <span className="font-mono text-[9.5px] font-extrabold uppercase tracking-wider text-textMuted/70 block">
+                    {agent.category}
                   </span>
-                  <h4 className="font-display font-bold text-sm mb-1.5 text-text group-hover:text-cyan-400 transition-colors">
-                    {agent.name}
-                  </h4>
-                  <p className="text-xs text-textMuted leading-relaxed line-clamp-3">
-                    {agent.desc}
+                  <h3 className="font-display font-bold text-base text-text flex items-center gap-1.5 group-hover:text-cyan-400 transition-colors">
+                    <span>{agent.emoji}</span>
+                    <span className="truncate">{agent.name}</span>
+                  </h3>
+                  <p className="text-xs text-textMuted leading-snug line-clamp-2">
+                    {agent.catchphrase || agent.desc}
                   </p>
                 </div>
-              </StaggerItem>
+              </motion.div>
             );
           })}
-        </Stagger>
+        </div>
       </section>
 
       {/* Footer */}

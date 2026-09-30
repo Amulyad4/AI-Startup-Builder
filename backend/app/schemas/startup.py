@@ -107,4 +107,9 @@ class StartupStatusResponse(BaseModel):
     status: str
     error: Optional[str] = None
     result: Optional[StartupResponse] = None
+    current_agent: Optional[str] = None
+    current_agent_name: Optional[str] = None
+    completed_agents: Optional[List[str]] = Field(default_factory=list)
+    progress_percent: Optional[int] = 0
+
 
